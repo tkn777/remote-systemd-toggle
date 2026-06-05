@@ -31,5 +31,8 @@ local-docs
 
 # VSCodeCounter
 .VSCodeCounter
+
+# Codex
 .codex
+.agents
 
