@@ -54,7 +54,7 @@ func main() {
 	passwd := hasArg("--passwd")
 	setupLog(dev || passwd)
 
-	configPath, configDir := common.FindConfig()
+	configPath, configDir := common.FindConfig("config-server.yml")
 	fixServerPerms(configDir, configPath)
 	loaded := common.LoadConfigPath(configPath)
 

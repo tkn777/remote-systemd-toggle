@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	loaded := common.LoadConfig()
+	loaded := common.LoadConfig("config-client.yml")
 	cfg := loaded.Config
 
 	certPool, err := x509.SystemCertPool()

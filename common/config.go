@@ -39,8 +39,8 @@ type LoadedConfig struct {
 	Dir    string
 }
 
-func LoadConfig() LoadedConfig {
-	path, _ := FindConfig()
+func LoadConfig(name string) LoadedConfig {
+	path, _ := FindConfig(name)
 	return LoadConfigPath(path)
 }
 
@@ -69,15 +69,15 @@ func LoadConfigPath(path string) LoadedConfig {
 	}
 }
 
-func FindConfig() (string, string) {
+func FindConfig(name string) (string, string) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
 	paths := []string{
-		filepath.Join(home, ".config", "ovpn-unlock", "config.yml"),
-		"/etc/ovpn-unlock/config.yml",
+		filepath.Join(home, ".config", "ovpn-unlock", name),
+		filepath.Join("/etc", "ovpn-unlock", name),
 	}
 
 	for _, path := range paths {
@@ -86,5 +86,5 @@ func FindConfig() (string, string) {
 		}
 	}
 
-	panic("config.yml not found")
+	panic(name + " not found")
 }
