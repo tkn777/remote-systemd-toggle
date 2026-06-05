@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"golang.org/x/term"
-
 	"ovpn-unlock/common"
+
+	"golang.org/x/term"
 )
 
 func main() {
