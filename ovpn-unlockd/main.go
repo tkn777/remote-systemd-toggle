@@ -99,7 +99,7 @@ func main() {
 			logger.Printf("accept failed: %v", err)
 			continue
 		}
-		handleConn(conn, loaded.Dir, cfg)
+		handleConn(conn, loaded.Dir, cfg, dev)
 	}
 }
 
@@ -197,7 +197,7 @@ func writeSecret(path string) {
 	logger.Printf("wrote %s", path)
 }
 
-func handleConn(conn net.Conn, configDir string, cfg common.Config) {
+func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	defer conn.Close()
 
 	if err := conn.SetDeadline(time.Now().Add(time.Duration(cfg.Server.Timeout) * time.Second)); err != nil {
@@ -225,7 +225,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config) {
 	wrongPassMu.Lock()
 	wrongPasses = 0
 	wrongPassMu.Unlock()
-	toggleOpenVPN(cfg)
+	toggleOpenVPN(cfg, dev)
 }
 
 func checkClientCN(conn net.Conn, want string) bool {
@@ -296,10 +296,15 @@ func checkPassword(path string, pass []byte) bool {
 	return len(got) == len(want) && subtle.ConstantTimeCompare(got, want) == 1 // Constant-time compare avoids leaking prefix matches.
 }
 
-func toggleOpenVPN(cfg common.Config) {
+func toggleOpenVPN(cfg common.Config, dev bool) {
 	service := cfg.OpenVPN.Service
 	if service == "" {
 		service = defaultService
+	}
+
+	if dev {
+		logger.Printf("dev mode: would toggle %s", service)
+		return
 	}
 
 	cmd := exec.Command("systemctl", "is-active", "--quiet", service)
