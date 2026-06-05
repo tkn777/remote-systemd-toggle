@@ -205,6 +205,10 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config) {
 		return
 	}
 
+	if !checkClientCN(conn, cfg.TLS.ClientCN) {
+		return
+	}
+
 	pass, err := common.ReadPassword(conn)
 	if err != nil {
 		logger.Printf("read failed: %v", err)
@@ -222,6 +226,31 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config) {
 	wrongPasses = 0
 	wrongPassMu.Unlock()
 	toggleOpenVPN(cfg)
+}
+
+func checkClientCN(conn net.Conn, want string) bool {
+	tlsConn, ok := conn.(*tls.Conn)
+	if !ok {
+		panic("expected tls connection")
+	}
+	if err := tlsConn.Handshake(); err != nil {
+		logger.Printf("tls handshake failed: %v", err)
+		return false
+	}
+	if want == "" {
+		return true
+	}
+
+	certs := tlsConn.ConnectionState().PeerCertificates
+	if len(certs) == 0 {
+		logger.Print("client certificate missing")
+		return false
+	}
+	if certs[0].Subject.CommonName != want {
+		logger.Printf("client certificate CN mismatch: %q", certs[0].Subject.CommonName)
+		return false
+	}
+	return true
 }
 
 func wrongPassword() {

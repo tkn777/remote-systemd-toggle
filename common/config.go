@@ -26,6 +26,7 @@ type TLSConfig struct {
 	Key          string `yaml:"key"`
 	ServerCACert string `yaml:"server-ca-cert"`
 	ClientCACert string `yaml:"client-ca-cert"`
+	ClientCN     string `yaml:"client-cn"`
 }
 
 type OpenVPNConfig struct {
