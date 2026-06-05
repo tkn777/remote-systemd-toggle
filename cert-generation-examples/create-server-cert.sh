@@ -6,7 +6,7 @@ OUT_DIR="${1:-server-certs}"
 SERVER_NAME="${2:-localhost}"
 SERVER_CA_CN="${SERVER_CA_CN:-ovpn-unlock server CA}"
 SERVER_CN="${SERVER_CN:-$SERVER_NAME}"
-DAYS="${DAYS:-825}"
+DAYS="${DAYS:-36500}"
 
 mkdir -p "$OUT_DIR"
 

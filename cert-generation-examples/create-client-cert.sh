@@ -6,7 +6,7 @@ OUT_DIR="${1:-client-certs}"
 CLIENT_NAME="${2:-ovpn-unlock-client}"
 CLIENT_CA_CN="${CLIENT_CA_CN:-ovpn-unlock client CA}"
 CLIENT_CN="${CLIENT_CN:-$CLIENT_NAME}"
-DAYS="${DAYS:-825}"
+DAYS="${DAYS:-36500}"
 
 mkdir -p "$OUT_DIR"
 
