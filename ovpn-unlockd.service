@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenVPN unlock daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/local/bin/ovpn-unlockd
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
