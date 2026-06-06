@@ -15,11 +15,12 @@ password storage. The server is intended to run as root because it calls
 - `systemd-service-toggle`: TLS client
 - `common`: shared config and wire protocol code
 
+---
 
 ## 🚀 Usage
 
-- The client prompts for a password and sends it in one request to the server and exits. 
-- The server accepts one connection at a time, reads one password frame, verifies it, and toggles the configured systemd service.
+1) The client prompts for a password and sends it in one request to the server and exits. 
+2) The server accepts one connection at a time, reads one password frame, verifies it, and toggles the configured systemd service.
 
 ---
 
@@ -74,27 +75,25 @@ sudo apt install systemd-service-toggle-client
 
 ## 🔨 Build
 
-First clone the repository or (better) get source tarball from a release.
+First get source code tarball from a release (or clone the repository, but this is not recommended, because it is under development).
 
-Build the client:
+#### Build the client:
 
 ```sh
 go build -o systemd-service-toggle ./systemd-service-toggle
 ```
 
-Build the server:
+#### Build the server:
 
 ```sh
 go build -o systemd-service-toggled ./systemd-service-toggled
 ```
 
-Cross-compile the client for Windows:
+#### Cross-compile the client for Windows:
 
 ```sh
 GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
 ```
-
-(You should prefer an release artifact instead, because source code is in development.)
 
 ---
 
@@ -173,7 +172,7 @@ Create or replace the server-side password hash:
 systemd-service-toggled --passwd
 ```
 
-The command reads the server config, writes `secret` next to it, and exits.
+This command prompts for a password, reads the server config, writes `secret` next to it, and exits.
 
 ---
 
@@ -181,13 +180,13 @@ The command reads the server config, writes `secret` next to it, and exits.
 
 OpenSSL helper scripts are provided in `cert-generation-examples/`.
 
-Create a client CA and client certificate:
+#### Create a client CA and client certificate:
 
 ```sh
 ./cert-generation-examples/create-client-cert.sh client-certs systemd-service-toggle-client
 ```
 
-Create a server CA and server certificate for development:
+#### Create a server CA and server certificate for development:
 
 ```sh
 ./cert-generation-examples/create-server-cert.sh server-certs vpn.example.org
@@ -220,8 +219,7 @@ Run the server in development mode:
 systemd-service-toggled --dev
 ```
 
-In development mode the server logs to stdout and does not start or stop the
-configured service. It only logs what it would toggle.
+In development mode the server logs to stdout and does not start or stop the configured service. It only logs what it would toggle.
 
 ---
 
