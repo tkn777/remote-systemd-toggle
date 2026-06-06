@@ -11,13 +11,15 @@ password storage. The server is intended to run as root because it calls
 
 ## 🧩 Components
 
-- `systemd-service-toggled`: TLS server/daemon
+- `systemd-service-toggled`: TLS server
 - `systemd-service-toggle`: TLS client
 - `common`: shared config and wire protocol code
 
-The client sends one request and exits. The server accepts one connection at a
-time, reads one password frame, verifies it, and toggles the configured systemd
-service.
+
+## 🚀 Usage
+
+- The client prompts for a password and sends it in one request to the server and exits. 
+- The server accepts one connection at a time, reads one password frame, verifies it, and toggles the configured systemd service.
 
 ---
 
@@ -29,10 +31,8 @@ strict authentication:
 - TLS 1.3 only
 - mutual TLS is required
 - the server verifies the client certificate against `TLS.client-ca-cert`
-- the server can additionally verify the client certificate CN with
-  `TLS.client-cn`
-- the client verifies the server certificate using system CAs plus optional
-  `TLS.server-ca-cert`
+- the server can additionally verify the client certificate CN with `TLS.client-cn`
+- the client verifies the server certificate using system CAs plus optional `TLS.server-ca-cert`
 - passwords are read through a hidden prompt
 - passwords are never logged
 - password bytes are wiped after use where practical
@@ -47,12 +47,34 @@ After wrong passwords, the server waits increasingly longer:
 delay = wrong_attempts * wrong_attempts * 3 minutes
 ```
 
-On the tenth wrong password, the daemon disables and stops itself with
-`systemctl`.
+On the tenth wrong password, the server disables and stops itself with `systemctl`.
+
+---
+
+## 📦 Release Artifacts
+
+GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a Windows client binary.
+
+- The Linux packages are built for `amd64` and `arm64`. 
+- The Windows artifact contains the client only.
+
+If you need support for other architectures, just open an issue.
+
+#### 🗄️ Debian Repository
+
+You can use the Debian repository provided by `thk-systems.net` to receive automatic updates (currently only amd64):
+
+```bash
+curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
+sudo apt install systemd-service-toggle-server  (or/and)
+sudo apt install systemd-service-toggle-client
+```
 
 ---
 
 ## 🔨 Build
+
+First clone the repository or (better) get source tarball from a release.
 
 Build the client:
 
@@ -72,23 +94,7 @@ Cross-compile the client for Windows:
 GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
 ```
 
----
-
-## 📦 Release Artifacts
-
-GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a Windows client binary.
-
-The Linux packages are built for `amd64` and `arm64`. The Windows artifact contains the client only.
-
-#### 🗄️ Debian Repository
-
-You can use the Debian repository provided by `thk-systems.net` to receive automatic updates:
-
-```bash
-curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
-sudo apt install systemd-service-toggle-server  (or/and)
-sudo apt install systemd-service-toggle-client
-```
+(You should prefer an release artifact instead, because source code is in development.)
 
 ---
 
@@ -119,6 +125,8 @@ The server searches:
 /etc/systemd-service-toggle/config-server.yml
 ```
 
+If you are using Windows, you should create a `.config` directory in your user`s home directory.
+
 Example configs are in `config-examples/`.
 
 ### 💻 Client Config
@@ -130,10 +138,12 @@ Server:
   timeout: 5 # optional, default 5 seconds
 
 TLS:
-  cert: /home/user/.config/systemd-service-toggle/client.crt
-  key: /home/user/.config/systemd-service-toggle/client.key
-  server-ca-cert: /home/user/.config/systemd-service-toggle/server-ca.crt # optional, extends system CAs
+  cert: /home/<user>/.config/systemd-service-toggle/client.crt
+  key: /home/<user>/.config/systemd-service-toggle/client.key
+  server-ca-cert: /home/<user>/.config/systemd-service-toggle/server-ca.crt # optional, extends system CAs
 ```
+
+(see below how to create certificates)
 
 ### 🖥️ Server Config
 
@@ -229,8 +239,10 @@ You were not just a dog. You were family, my companion, and my friend.
 
 You will never be forgotten. 🐾
 
+---
+
 ## 📄 License
 
-MIT
+MIT License
 
 Copyright (c) 2026 Thomas Kuhlmann
