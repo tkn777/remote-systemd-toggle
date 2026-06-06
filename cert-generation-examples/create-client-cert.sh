@@ -3,8 +3,8 @@ set -eu
 umask 077
 
 OUT_DIR="${1:-client-certs}"
-CLIENT_NAME="${2:-ovpn-unlock-client}"
-CLIENT_CA_CN="${CLIENT_CA_CN:-ovpn-unlock client CA}"
+CLIENT_NAME="${2:-systemd-service-toggle-client}"
+CLIENT_CA_CN="${CLIENT_CA_CN:-systemd-service-toggle client CA}"
 CLIENT_CN="${CLIENT_CN:-$CLIENT_NAME}"
 DAYS="${DAYS:-36500}"
 

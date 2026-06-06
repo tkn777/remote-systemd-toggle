@@ -4,6 +4,6 @@ Server:
   timeout: 5 # optional, default 5 seconds
 
 TLS:
-  cert: /home/user/.config/ovpn-unlock/client.crt
-  key: /home/user/.config/ovpn-unlock/client.key
-  server-ca-cert: /home/user/.config/ovpn-unlock/server-ca.crt # optional, extends system CAs
+  cert: /home/user/.config/systemd-service-toggle/client.crt
+  key: /home/user/.config/systemd-service-toggle/client.key
+  server-ca-cert: /home/user/.config/systemd-service-toggle/server-ca.crt # optional, extends system CAs

@@ -1,4 +1,4 @@
-// Package main implements the ovpn-unlock TLS client.
+// Package main implements the systemd-service-toggle TLS client.
 package main
 
 import (
@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"ovpn-unlock/common"
+	"systemd-service-toggle/common"
 
 	"golang.org/x/term"
 )

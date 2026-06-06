@@ -1,4 +1,4 @@
-module ovpn-unlock/common
+module systemd-service-toggle/common
 
 go 1.26
 

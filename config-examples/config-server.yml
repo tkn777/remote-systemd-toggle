@@ -6,8 +6,8 @@ Server:
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
-  client-ca-cert: /etc/ovpn-unlock/client-ca.crt
-  client-cn: ovpn-unlock-client # optional, verifies the client certificate CN when set
+  client-ca-cert: /etc/systemd-service-toggle/client-ca.crt
+  client-cn: systemd-service-toggle-client # optional, verifies the client certificate CN when set
 
-OpenVPN:
-  service: openvpn-server@intern.thk-systems.de.service # optional, default openvpn-server@intern.thk-systems.de.service
+Service:
+  name: example.service

@@ -1,4 +1,4 @@
-// Package common contains shared config and wire protocol helpers for ovpn-unlock.
+// Package common contains shared config and wire protocol helpers for systemd-service-toggle.
 package common
 
 import (

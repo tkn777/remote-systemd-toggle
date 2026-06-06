@@ -1,4 +1,4 @@
-// Package main implements the ovpn-unlockd TLS server.
+// Package main implements the systemd-service-toggled TLS server.
 package main
 
 import (
@@ -21,13 +21,12 @@ import (
 	"golang.org/x/term"
 	"gopkg.in/yaml.v3"
 
-	"ovpn-unlock/common"
+	"systemd-service-toggle/common"
 )
 
 const (
-	defaultListen  = "0.0.0.0"
-	defaultService = "openvpn-server@intern.thk-systems.de.service"
-	selfService    = "ovpn-unlockd.service"
+	defaultListen = "0.0.0.0"
+	selfService   = "systemd-service-toggled.service"
 
 	wrongPasswordLimit = 10
 	wrongPasswordDelay = 3 * time.Minute
@@ -118,7 +117,7 @@ func setupLog(stdout bool) {
 	}
 
 	var err error
-	syslogOut, err = syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "ovpn-unlockd")
+	syslogOut, err = syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "systemd-service-toggled")
 	if err != nil {
 		panic(err)
 	}
@@ -222,7 +221,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	}
 
 	wrongPasses = 0
-	toggleOpenVPN(cfg, dev)
+	toggleService(cfg, dev)
 }
 
 func checkClientCN(conn net.Conn, want string) bool {
@@ -294,12 +293,8 @@ func checkPassword(path string, pass []byte) bool {
 	return len(got) == len(want) && subtle.ConstantTimeCompare(got, want) == 1 // Constant-time compare avoids leaking prefix matches.
 }
 
-func toggleOpenVPN(cfg common.Config, dev bool) {
-	service := cfg.OpenVPN.Service
-	if service == "" {
-		service = defaultService
-	}
-
+func toggleService(cfg common.Config, dev bool) {
+	service := cfg.Service.Name
 	if dev {
 		logger.Printf("dev mode: would toggle %s", service)
 		return

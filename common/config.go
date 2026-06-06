@@ -1,4 +1,4 @@
-// Package common contains shared config and wire protocol helpers for ovpn-unlock.
+// Package common contains shared config and wire protocol helpers for systemd-service-toggle.
 package common
 
 import (
@@ -11,7 +11,7 @@ import (
 type Config struct {
 	Server  ServerConfig  `yaml:"Server"`
 	TLS     TLSConfig     `yaml:"TLS"`
-	OpenVPN OpenVPNConfig `yaml:"OpenVPN"`
+	Service ServiceConfig `yaml:"Service"`
 }
 
 type ServerConfig struct {
@@ -29,8 +29,8 @@ type TLSConfig struct {
 	ClientCN     string `yaml:"client-cn"`
 }
 
-type OpenVPNConfig struct {
-	Service string `yaml:"service"`
+type ServiceConfig struct {
+	Name string `yaml:"name"`
 }
 
 type LoadedConfig struct {
@@ -76,8 +76,8 @@ func FindConfig(name string) (string, string) {
 	}
 
 	paths := []string{
-		filepath.Join(home, ".config", "ovpn-unlock", name),
-		filepath.Join("/etc", "ovpn-unlock", name),
+		filepath.Join(home, ".config", "systemd-service-toggle", name),
+		filepath.Join("/etc", "systemd-service-toggle", name),
 	}
 
 	for _, path := range paths {
