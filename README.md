@@ -191,7 +191,7 @@ Though he is gone, his paw prints remain on my heart, and the memories of our ti
 
 You were not just a dog. You were family, my companion, and my friend.
 
-You will never be forgotten. ❤️🐾
+You will never be forgotten. 🐾
 
 ## 📄 License
 
