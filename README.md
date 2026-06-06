@@ -133,13 +133,13 @@ Example configs are in `config-examples/`.
 ```yaml
 Server:
   address: vpn.example.org
-  port: 47112 # optional, default 47112
-  timeout: 5 # optional, default 5 seconds
+  port: 47112   # optional, default 47112
+  timeout: 5    # optional, default 5 seconds
 
 TLS:
   cert: /home/<user>/.config/systemd-service-toggle/client.crt
   key: /home/<user>/.config/systemd-service-toggle/client.key
-  server-ca-cert: /home/<user>/.config/systemd-service-toggle/server-ca.crt # optional, extends system CAs
+  server-ca-cert: /home/<user>/.config/systemd-service-toggle/server-ca.crt   # optional, extends system CAs
 ```
 
 (see below how to create certificates)
@@ -148,15 +148,15 @@ TLS:
 
 ```yaml
 Server:
-  listen: 0.0.0.0 # optional, default 0.0.0.0
-  port: 47112 # optional, default 47112
-  timeout: 5 # optional, default 5 seconds
+  listen: 0.0.0.0   # optional, default 0.0.0.0
+  port: 47112       # optional, default 47112
+  timeout: 5        # optional, default 5 seconds
 
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
   client-ca-cert: /etc/systemd-service-toggle/client-ca.crt
-  client-cn: systemd-service-toggle-client # optional, verifies the client certificate CN when set
+  client-cn: systemd-service-toggle-client   # optional, verifies the client certificate CN when set
 
 Service:
   name: example.service
