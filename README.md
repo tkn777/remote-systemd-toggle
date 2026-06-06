@@ -9,17 +9,6 @@ password storage. The server is intended to run as root because it calls
 
 ---
 
-## 🏷️ Version
-
-Both binaries support `--version`:
-
-```sh
-systemd-service-toggle --version
-systemd-service-toggled --version
-```
-
----
-
 ## 🧩 Components
 
 - `systemd-service-toggled`: TLS server/daemon
@@ -99,6 +88,17 @@ You can use the Debian repository provided by `thk-systems.net` to receive autom
 curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
 sudo apt install systemd-service-toggle-server  (or/and)
 sudo apt install systemd-service-toggle-client
+```
+
+---
+
+## 🏷️ Version
+
+Both binaries support `--version`:
+
+```sh
+systemd-service-toggle --version
+systemd-service-toggled --version
 ```
 
 ---
