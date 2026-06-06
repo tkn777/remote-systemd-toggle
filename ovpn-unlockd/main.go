@@ -174,7 +174,7 @@ func writeSecret(path string) {
 
 	secret := secretFile{
 		Salt:    base64.StdEncoding.EncodeToString(salt),
-		Time:    4,
+		Time:    5,
 		Memory:  64 * 1024,
 		Threads: 1,
 		KeyLen:  32,
