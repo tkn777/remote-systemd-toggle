@@ -174,7 +174,7 @@ GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a 
 
 The Linux packages are built for `amd64` and `arm64`. The Windows artifact contains the client only.
 
-### 🗄️ Debian Repository
+#### 🗄️ Debian Repository
 
 You can use the Debian repository provided by `thk-systems.net` to receive automatic updates:
 
