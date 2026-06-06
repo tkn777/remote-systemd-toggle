@@ -7,6 +7,8 @@ It uses TLS 1.3 with mutual TLS, an additional password check, and Argon2id for
 password storage. The server is intended to run as root because it calls
 `systemctl` directly.
 
+---
+
 ## 🏷️ Version
 
 Both binaries support `--version`:
@@ -16,7 +18,7 @@ systemd-service-toggle --version
 systemd-service-toggled --version
 ```
 
-The current version is `0.9.0`.
+---
 
 ## 🧩 Components
 
@@ -27,6 +29,8 @@ The current version is `0.9.0`.
 The client sends one request and exits. The server accepts one connection at a
 time, reads one password frame, verifies it, and toggles the configured systemd
 service.
+
+---
 
 ## 🛡️ Security Model
 
@@ -56,6 +60,48 @@ delay = wrong_attempts * wrong_attempts * 3 minutes
 
 On the tenth wrong password, the daemon disables and stops itself with
 `systemctl`.
+
+---
+
+## 🔨 Build
+
+Build the client:
+
+```sh
+go build -o systemd-service-toggle ./systemd-service-toggle
+```
+
+Build the server:
+
+```sh
+go build -o systemd-service-toggled ./systemd-service-toggled
+```
+
+Cross-compile the client for Windows:
+
+```sh
+GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
+```
+
+---
+
+## 📦 Release Artifacts
+
+GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a Windows client binary.
+
+The Linux packages are built for `amd64` and `arm64`. The Windows artifact contains the client only.
+
+#### 🗄️ Debian Repository
+
+You can use the Debian repository provided by `thk-systems.net` to receive automatic updates:
+
+```bash
+curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
+sudo apt install systemd-service-toggle-server  (or/and)
+sudo apt install systemd-service-toggle-client
+```
+
+---
 
 ## ⚙️ Configuration
 
@@ -107,6 +153,8 @@ Service:
   name: example.service
 ```
 
+---
+
 ## 🔑 Password Setup
 
 Create or replace the server-side password hash:
@@ -117,16 +165,7 @@ systemd-service-toggled --passwd
 
 The command reads the server config, writes `secret` next to it, and exits.
 
-## 🧪 Development Mode
-
-Run the server in development mode:
-
-```sh
-systemd-service-toggled --dev
-```
-
-In development mode the server logs to stdout and does not start or stop the
-configured service. It only logs what it would toggle.
+---
 
 ## 📜 Certificates
 
@@ -148,43 +187,9 @@ For production servers, a public CA certificate such as a certbot certificate is
 usually preferable for the server certificate. The client certificate should
 still be issued by your private client CA.
 
-## 🔨 Build
+---
 
-Build the client:
-
-```sh
-go build -o systemd-service-toggle ./systemd-service-toggle
-```
-
-Build the server:
-
-```sh
-go build -o systemd-service-toggled ./systemd-service-toggled
-```
-
-Cross-compile the client for Windows:
-
-```sh
-GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
-```
-
-## 📦 Release Artifacts
-
-GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a Windows client binary.
-
-The Linux packages are built for `amd64` and `arm64`. The Windows artifact contains the client only.
-
-#### 🗄️ Debian Repository
-
-You can use the Debian repository provided by `thk-systems.net` to receive automatic updates:
-
-```bash
-curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
-sudo apt install systemd-service-toggle-server  (or/and)
-sudo apt install systemd-service-toggle-client
-```
-
-## 🧰 systemd
+## 🧰 systemd integration
 
 An example unit file is provided:
 
@@ -194,6 +199,21 @@ systemd-service-toggled.service
 
 Install it according to your distribution's systemd conventions and adjust
 paths if needed.
+
+---
+
+## 🧪 Development Mode
+
+Run the server in development mode:
+
+```sh
+systemd-service-toggled --dev
+```
+
+In development mode the server logs to stdout and does not start or stop the
+configured service. It only logs what it would toggle.
+
+---
 
 ## 🐕 Dedicated to Jessie
 
