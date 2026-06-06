@@ -7,6 +7,17 @@ It uses TLS 1.3 with mutual TLS, an additional password check, and Argon2id for
 password storage. The server is intended to run as root because it calls
 `systemctl` directly.
 
+## Version
+
+Both binaries support `--version`:
+
+```sh
+systemd-service-toggle --version
+systemd-service-toggled --version
+```
+
+The current version is `0.9.0`.
+
 ## Components
 
 - `systemd-service-toggled`: TLS server/daemon

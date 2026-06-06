@@ -47,7 +47,14 @@ var (
 	wrongPasses int
 )
 
+var version = "0.9.0"
+
 func main() {
+	if hasArg("--version") {
+		fmt.Println(version)
+		return
+	}
+
 	dev := hasArg("--dev")
 	passwd := hasArg("--passwd")
 	setupLog(dev || passwd)
