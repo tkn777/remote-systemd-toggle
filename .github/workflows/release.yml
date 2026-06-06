@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y alien rpm
+
+      - name: Prepare version
+        id: version
+        shell: sh
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          package_version="$version"
+          prerelease=false
+
+          case "$version" in
+            *-*)
+              prerelease=true
+              package_version="$(printf '%s' "$version" | sed 's/-/~/g')"
+              ;;
+          esac
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "package_version=$package_version" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+
+      - name: Build artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          PACKAGE_VERSION: ${{ steps.version.outputs.package_version }}
+        run: ./release/release.sh
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: systemd-service-toggle ${{ github.ref_name }}
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          files: dist/*

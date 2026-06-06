@@ -3,6 +3,7 @@ set -eu
 
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 VERSION="${VERSION:-0.9.0}"
+PACKAGE_VERSION="${PACKAGE_VERSION:-$(printf '%s' "$VERSION" | sed 's/-/~/g')}"
 OUT_DIR="$ROOT_DIR/dist"
 BUILD_DIR="$ROOT_DIR/.build"
 
@@ -53,7 +54,7 @@ control_file() {
 
 	cat > "$file" <<CONTROL
 Package: $package
-Version: $VERSION
+Version: $PACKAGE_VERSION
 Section: utils
 Priority: optional
 Architecture: $arch
@@ -69,7 +70,7 @@ build_deb() {
 	description="$4"
 	with_service="$5"
 
-	pkg_dir="$BUILD_DIR/${package}_${VERSION}_${arch}"
+	pkg_dir="$BUILD_DIR/${package}_${PACKAGE_VERSION}_${arch}"
 	rm -rf "$pkg_dir"
 	mkdir -p "$pkg_dir/DEBIAN" "$pkg_dir/usr/bin"
 
@@ -81,7 +82,7 @@ build_deb() {
 		install -m 0644 "$ROOT_DIR/systemd-service-toggled.service" "$pkg_dir/lib/systemd/system/"
 	fi
 
-	dpkg-deb --root-owner-group --build "$pkg_dir" "$OUT_DIR/${package}_${VERSION}_${arch}.deb"
+	dpkg-deb --root-owner-group --build "$pkg_dir" "$OUT_DIR/${package}_${PACKAGE_VERSION}_${arch}.deb"
 }
 
 build_rpm_from_deb() {
@@ -108,12 +109,12 @@ for arch in amd64 arm64; do
 	build_deb "$SERVER_NAME" "$server_bin" "$arch" \
 		"mTLS-protected remote systemd service toggle service" "yes"
 
-	build_rpm_from_deb "$OUT_DIR/${CLIENT_NAME}_${VERSION}_${arch}.deb"
-	build_rpm_from_deb "$OUT_DIR/${SERVER_NAME}_${VERSION}_${arch}.deb"
+	build_rpm_from_deb "$OUT_DIR/${CLIENT_NAME}_${PACKAGE_VERSION}_${arch}.deb"
+	build_rpm_from_deb "$OUT_DIR/${SERVER_NAME}_${PACKAGE_VERSION}_${arch}.deb"
 done
 
 build_go ./systemd-service-toggle windows amd64 "$OUT_DIR/${CLIENT_NAME}.exe"
 
 echo "release artifacts written to $OUT_DIR"
 
-rm -rf ${BUILD_DIR}
+rm -rf "$BUILD_DIR"
