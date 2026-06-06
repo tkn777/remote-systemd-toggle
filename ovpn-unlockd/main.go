@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"golang.org/x/crypto/argon2"
@@ -30,7 +29,8 @@ const (
 	defaultService = "openvpn-server@intern.thk-systems.de.service"
 	selfService    = "ovpn-unlockd.service"
 
-	wrongPasswordLimit = 5
+	wrongPasswordLimit = 10
+	wrongPasswordDelay = 3 * time.Minute
 )
 
 type secretFile struct {
@@ -45,7 +45,6 @@ type secretFile struct {
 var (
 	logger      *log.Logger
 	syslogOut   *syslog.Writer
-	wrongPassMu sync.Mutex
 	wrongPasses int
 )
 
@@ -222,9 +221,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 		return
 	}
 
-	wrongPassMu.Lock()
 	wrongPasses = 0
-	wrongPassMu.Unlock()
 	toggleOpenVPN(cfg, dev)
 }
 
@@ -254,18 +251,19 @@ func checkClientCN(conn net.Conn, want string) bool {
 }
 
 func wrongPassword() {
-	wrongPassMu.Lock()
-	defer wrongPassMu.Unlock()
-
 	wrongPasses++
+
 	logger.Printf("wrong password attempt %d", wrongPasses)
-	if wrongPasses < wrongPasswordLimit {
+	if wrongPasses >= wrongPasswordLimit {
+		logger.Print("wrong password limit reached, disabling service", "limit", wrongPasswordLimit)
+		runSystemctl("disable", selfService)
+		runSystemctl("stop", selfService)
 		return
 	}
 
-	logger.Print("wrong password limit reached, disabling service", "limit", wrongPasswordLimit)
-	runSystemctl("disable", selfService)
-	runSystemctl("stop", selfService)
+	delay := time.Duration(wrongPasses*wrongPasses) * wrongPasswordDelay
+	logger.Printf("waiting after wrong password: %s", delay)
+	time.Sleep(delay)
 }
 
 func checkPassword(path string, pass []byte) bool {
