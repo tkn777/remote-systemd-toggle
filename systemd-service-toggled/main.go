@@ -47,7 +47,7 @@ var (
 	wrongPasses int
 )
 
-var version = "0.9.0"
+var version = "dev"
 
 func main() {
 	if common.HasArg(os.Args[1:], "--version") {

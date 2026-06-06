@@ -36,3 +36,6 @@ local-docs
 .codex
 .agents
 
+# Build
+.build
+dist
