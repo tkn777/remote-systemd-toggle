@@ -1,6 +1,6 @@
 module systemd-service-toggle/systemd-service-toggle
 
-go 1.26.0
+go 1.26
 
 require (
 	golang.org/x/term v0.43.0
