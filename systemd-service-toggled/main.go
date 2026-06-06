@@ -88,7 +88,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer ln.Close()
+	defer ln.Close() //nolint:errcheck // Listener is closed during shutdown; close errors are not actionable.
 
 	logger.Printf("listening on %s:%d", cfg.Server.Listen, cfg.Server.Port)
 	for {
@@ -196,7 +196,7 @@ func writeSecret(path string) {
 }
 
 func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
-	defer conn.Close()
+	defer conn.Close() //nolint:errcheck // Connection is closed after one request; close errors are not actionable.
 
 	if err := conn.SetDeadline(time.Now().Add(time.Duration(cfg.Server.Timeout) * time.Second)); err != nil {
 		logger.Printf("deadline failed: %v", err)
