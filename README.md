@@ -168,6 +168,22 @@ Cross-compile the client for Windows:
 GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
 ```
 
+## 📦 Release Artifacts
+
+GitHub releases provide Debian packages, Red Hat compatible RPM packages, and a Windows client binary.
+
+The Linux packages are built for `amd64` and `arm64`. The Windows artifact contains the client only.
+
+### 🗄️ Debian Repository
+
+You can use the Debian repository provided by `thk-systems.net` to receive automatic updates:
+
+```bash
+curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
+sudo apt install systemd-service-toggle-server  (or/and)
+sudo apt install systemd-service-toggle-client
+```
+
 ## 🧰 systemd
 
 An example unit file is provided:
