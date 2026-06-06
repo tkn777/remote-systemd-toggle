@@ -225,17 +225,13 @@ In development mode the server logs to stdout and does not start or stop the con
 
 ## 🐕 Dedicated to Jessie
 
-Jessie, my best friend ever.
+This project is dedicated to Jessie, my best friend ever.
 
-He never left my side. Even when he was old and sick, he would fight his way up the stairs just to find me and be near me. We played together in the snow like two children, chasing sticks and sharing moments of pure joy.
-
-Through good days and hard days, he was always there — loyal, gentle, and steadfast. His companionship, trust, and unconditional friendship shaped my life in ways words can hardly express.
+He never left my side. Even when he was old and sick, he would fight his way up the stairs just to find me and be near me. We played together in the snow like two children, chasing sticks and sharing moments of pure joy.Through good days and hard days, he was always there — loyal, gentle, and steadfast. His companionship, trust, and unconditional friendship shaped my life in ways words can hardly express.
 
 Though he is gone, his paw prints remain on my heart, and the memories of our time together continue to bring both a smile and a tear.
 
-You were not just a dog. You were family, my companion, and my friend.
-
-You will never be forgotten. 🐾
+You were not just a dog. You were family, my companion, and my friend. You will never be forgotten. 🐾
 
 ---
 
