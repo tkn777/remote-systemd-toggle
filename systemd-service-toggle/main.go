@@ -17,7 +17,7 @@ import (
 var version = "0.9.0"
 
 func main() {
-	if hasArg("--version") {
+	if common.HasArg(os.Args[1:], "--version") {
 		fmt.Println(version)
 		return
 	}
@@ -70,13 +70,4 @@ func main() {
 	if err := common.WritePassword(conn, pass); err != nil {
 		panic(err)
 	}
-}
-
-func hasArg(arg string) bool {
-	for _, a := range os.Args[1:] {
-		if a == arg {
-			return true
-		}
-	}
-	return false
 }

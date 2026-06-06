@@ -50,13 +50,13 @@ var (
 var version = "0.9.0"
 
 func main() {
-	if hasArg("--version") {
+	if common.HasArg(os.Args[1:], "--version") {
 		fmt.Println(version)
 		return
 	}
 
-	dev := hasArg("--dev")
-	passwd := hasArg("--passwd")
+	dev := common.HasArg(os.Args[1:], "--dev")
+	passwd := common.HasArg(os.Args[1:], "--passwd")
 	setupLog(dev || passwd)
 
 	configPath, configDir := common.FindConfig("config-server.yml")
@@ -106,15 +106,6 @@ func main() {
 		}
 		handleConn(conn, loaded.Dir, cfg, dev)
 	}
-}
-
-func hasArg(arg string) bool {
-	for _, a := range os.Args[1:] {
-		if a == arg {
-			return true
-		}
-	}
-	return false
 }
 
 func setupLog(stdout bool) {
