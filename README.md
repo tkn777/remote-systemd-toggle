@@ -1,4 +1,4 @@
-# systemd-service-toggle
+# 🔐 systemd-service-toggle
 
 `systemd-service-toggle` is a small Go client/server tool for toggling a
 configured systemd service remotely.
@@ -7,7 +7,7 @@ It uses TLS 1.3 with mutual TLS, an additional password check, and Argon2id for
 password storage. The server is intended to run as root because it calls
 `systemctl` directly.
 
-## Version
+## 🏷️ Version
 
 Both binaries support `--version`:
 
@@ -18,7 +18,7 @@ systemd-service-toggled --version
 
 The current version is `0.9.0`.
 
-## Components
+## 🧩 Components
 
 - `systemd-service-toggled`: TLS server/daemon
 - `systemd-service-toggle`: TLS client
@@ -28,7 +28,7 @@ The client sends one request and exits. The server accepts one connection at a
 time, reads one password frame, verifies it, and toggles the configured systemd
 service.
 
-## Security Model
+## 🛡️ Security Model
 
 The server is designed to be reachable over an untrusted network, but only with
 strict authentication:
@@ -57,7 +57,7 @@ delay = wrong_attempts * wrong_attempts * 3 minutes
 On the tenth wrong password, the daemon disables and stops itself with
 `systemctl`.
 
-## Configuration
+## ⚙️ Configuration
 
 The client searches:
 
@@ -75,7 +75,7 @@ The server searches:
 
 Example configs are in `config-examples/`.
 
-### Client Config
+### 💻 Client Config
 
 ```yaml
 Server:
@@ -89,7 +89,7 @@ TLS:
   server-ca-cert: /home/user/.config/systemd-service-toggle/server-ca.crt # optional, extends system CAs
 ```
 
-### Server Config
+### 🖥️ Server Config
 
 ```yaml
 Server:
@@ -107,7 +107,7 @@ Service:
   name: example.service
 ```
 
-## Password Setup
+## 🔑 Password Setup
 
 Create or replace the server-side password hash:
 
@@ -117,7 +117,7 @@ systemd-service-toggled --passwd
 
 The command reads the server config, writes `secret` next to it, and exits.
 
-## Development Mode
+## 🧪 Development Mode
 
 Run the server in development mode:
 
@@ -128,7 +128,7 @@ systemd-service-toggled --dev
 In development mode the server logs to stdout and does not start or stop the
 configured service. It only logs what it would toggle.
 
-## Certificates
+## 📜 Certificates
 
 OpenSSL helper scripts are provided in `cert-generation-examples/`.
 
@@ -148,7 +148,7 @@ For production servers, a public CA certificate such as a certbot certificate is
 usually preferable for the server certificate. The client certificate should
 still be issued by your private client CA.
 
-## Build
+## 🔨 Build
 
 Build the client:
 
@@ -168,7 +168,7 @@ Cross-compile the client for Windows:
 GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
 ```
 
-## systemd
+## 🧰 systemd
 
 An example unit file is provided:
 
@@ -179,7 +179,7 @@ systemd-service-toggled.service
 Install it according to your distribution's systemd conventions and adjust
 paths if needed.
 
-## License
+## 📄 License
 
 MIT
 
