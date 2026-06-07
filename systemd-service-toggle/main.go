@@ -16,6 +16,25 @@ import (
 
 var version = "dev"
 
+func password() []byte {
+	for i, arg := range os.Args[1:] {
+		if arg == "--password" {
+			if i+2 >= len(os.Args) {
+				panic("missing value for --password")
+			}
+			return []byte(os.Args[i+2])
+		}
+	}
+
+	fmt.Print("Password: ")
+	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println()
+	if err != nil {
+		panic(err)
+	}
+	return pass
+}
+
 func main() {
 	if common.HasArg(os.Args[1:], "--version") {
 		fmt.Println(version)
@@ -44,12 +63,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Print("Password: ")
-	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println()
-	if err != nil {
-		panic(err)
-	}
+	pass := password()
 	defer common.Wipe(pass)
 
 	dialer := &net.Dialer{Timeout: time.Duration(cfg.Server.Timeout) * time.Second}
