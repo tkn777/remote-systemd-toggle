@@ -33,7 +33,7 @@ password storage. The server is intended to run as root because it calls
 
 ## 🚀 Usage
 
-1) The client prompts for a password and sends it in one request to the server and exits.
+1) The client prompts for a password and sends it in one request to the server and exits.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
 2) The server accepts one connection at a time, reads one password frame, verifies it, and toggles the configured systemd service.
 
