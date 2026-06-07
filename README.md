@@ -135,6 +135,7 @@ The client searches:
 
 ```text
 ~/.config/systemd-service-toggle/config-client.yml
+~/.systemd-service-toggle/config-client.yml
 /etc/systemd-service-toggle/config-client.yml
 ```
 
@@ -142,10 +143,11 @@ The server searches:
 
 ```text
 ~/.config/systemd-service-toggle/config-server.yml
+~/.systemd-service-toggle/config-server.yml
 /etc/systemd-service-toggle/config-server.yml
 ```
 
-If you are using Windows, you should create a `.config` directory in your user`s home directory.
+If you are using Windows, you should create a `.config` or a `.systemd-service-toggle` directory in your user`s home directory.
 
 Example configs are in `config-examples/`.
 

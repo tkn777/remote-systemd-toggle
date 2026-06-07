@@ -77,6 +77,7 @@ func FindConfig(name string) (string, string) {
 
 	paths := []string{
 		filepath.Join(home, ".config", "systemd-service-toggle", name),
+		filepath.Join(home, ".systemd-service-toggle", name),
 		filepath.Join("/etc", "systemd-service-toggle", name),
 	}
 
