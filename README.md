@@ -1,5 +1,10 @@
 # 🔐 systemd-service-toggle
 
+<p align="left">
+  <img src="resources/logo.png" alt="systemd-service-toggle" height=150>
+</p>
+
+
 ## ⚠️ Experimental Software
 
 **This project is highly experimental and under active development.**
