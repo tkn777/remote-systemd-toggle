@@ -1,7 +1,7 @@
 # 🔐 systemd-service-toggle
 
 <p align="left">
-  <img src="resources/logo.png" alt="systemd-service-toggle" height=150>
+  <img src="resources/logo.png" alt="systemd-service-toggle" height=200>
 </p>
 
 
