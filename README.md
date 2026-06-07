@@ -239,7 +239,7 @@ Development mode is completely non-destructive:
 - Logs are written to stdout.
 - The configured service is never started or stopped. The server only logs what it would do.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
-- No `systemctl` actions are executed after a wrong password. The server only logs whether it would stop and disable itself.
+- No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
 
 ---
 
