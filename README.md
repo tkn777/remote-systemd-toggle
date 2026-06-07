@@ -234,6 +234,8 @@ Run the server in development mode:
 systemd-service-toggled --dev
 ```
 
+Development mode is completely non-destructive:
+
 - Logs are written to stdout.
 - The configured service is never started or stopped. The server only logs what it would do.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
