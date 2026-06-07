@@ -63,7 +63,7 @@ After wrong passwords, the server waits increasingly longer:
 delay = wrong_attempts * wrong_attempts * 3 minutes
 ```
 
-On the tenth wrong password, the server disables and stops itself with `systemctl`.
+On the tenth wrong password, the server disables and stops itself with `systemctl`. (In `--dev` mode it only logs what it would do, does not wait after wrong passwords, and exits at the limit.)
 
 ---
 
@@ -234,7 +234,10 @@ Run the server in development mode:
 systemd-service-toggled --dev
 ```
 
-In development mode the server logs to stdout and does not start or stop the configured service. It only logs what it would toggle.
+- Logs are written to stdout.
+- The configured service is never started or stopped. The server only logs what it would do.
+- No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
+- No `systemctl` actions are executed after a wrong password. The server only logs whether it would stop and disable itself.
 
 ---
 

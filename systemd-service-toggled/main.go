@@ -214,7 +214,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 
 	ok := checkPassword(filepath.Join(configDir, "secret"), pass)
 	if !ok {
-		wrongPassword()
+		wrongPassword(dev)
 		return
 	}
 
@@ -247,11 +247,15 @@ func checkClientCN(conn net.Conn, want string) bool {
 	return true
 }
 
-func wrongPassword() {
+func wrongPassword(dev bool) {
 	wrongPasses++
 
 	logger.Printf("wrong password attempt %d", wrongPasses)
 	if wrongPasses >= wrongPasswordLimit {
+		if dev {
+			logger.Printf("wrong password limit reached, would disable and stop %s", selfService)
+			os.Exit(1)
+		}
 		logger.Print("wrong password limit reached, disabling service", "limit", wrongPasswordLimit)
 		runSystemctl("disable", selfService)
 		runSystemctl("stop", selfService)
@@ -259,6 +263,10 @@ func wrongPassword() {
 	}
 
 	delay := time.Duration(wrongPasses*wrongPasses) * wrongPasswordDelay
+	if dev {
+		logger.Printf("would wait after wrong password: %s", delay)
+		return
+	}
 	logger.Printf("waiting after wrong password: %s", delay)
 	time.Sleep(delay)
 }
