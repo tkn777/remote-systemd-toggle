@@ -4,6 +4,7 @@
   <img src="resources/logo.png" alt="systemd-service-toggle" height=200>
 </p>
 
+---
 
 ## ⚠️ Experimental Software
 
