@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"runtime/debug"
 	"time"
 
 	"remote-systemd-toggle/common"
@@ -39,6 +40,10 @@ func main() {
 	if common.HasArg(os.Args[1:], "--version") {
 		fmt.Println(version)
 		return
+	}
+	dev := common.HasArg(os.Args[1:], "--dev")
+	if !dev {
+		debug.SetTraceback("none")
 	}
 	cmd := common.CmdToggle
 	if common.HasArg(os.Args[1:], "--status") {

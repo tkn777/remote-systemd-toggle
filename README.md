@@ -253,6 +253,7 @@ Development mode is completely non-destructive:
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
 - `remote-systemd-toggle --status` always returns `unknown` and does not check the service status.
+- Stacktraces are printed.
 
 ---
 
