@@ -31,7 +31,7 @@ const (
 	selfService   = "remote-systemd-toggled.service"
 )
 
-type secretFile struct {
+type secretData struct {
 	Salt    string `yaml:"salt"`
 	Hash    string `yaml:"hash"`
 	Time    uint32 `yaml:"time"`
@@ -166,21 +166,7 @@ func writeSecret(path string) {
 	}
 	defer common.Wipe(pass)
 
-	salt := make([]byte, 16)
-	if _, err := rand.Read(salt); err != nil {
-		panic(err)
-	}
-
-	secret := secretFile{
-		Salt:    base64.StdEncoding.EncodeToString(salt),
-		Time:    5,
-		Memory:  64 * 1024,
-		Threads: 1,
-		KeyLen:  32,
-	}
-	hash := argon2.IDKey(pass, salt, secret.Time, secret.Memory, secret.Threads, secret.KeyLen)
-	defer common.Wipe(hash)
-	secret.Hash = base64.StdEncoding.EncodeToString(hash)
+	secret := newSecret(pass)
 
 	data, err := yaml.Marshal(secret)
 	if err != nil {
@@ -193,6 +179,26 @@ func writeSecret(path string) {
 		panic(err)
 	}
 	logger.Printf("wrote %s", path)
+}
+
+func newSecret(pass []byte) secretData {
+	salt := make([]byte, 16)
+	if _, err := rand.Read(salt); err != nil {
+		panic(err)
+	}
+	defer common.Wipe(salt)
+
+	secret := secretData{
+		Salt:    base64.StdEncoding.EncodeToString(salt),
+		Time:    5,
+		Memory:  64 * 1024,
+		Threads: 1,
+		KeyLen:  32,
+	}
+	hash := argon2.IDKey(pass, salt, secret.Time, secret.Memory, secret.Threads, secret.KeyLen)
+	defer common.Wipe(hash)
+	secret.Hash = base64.StdEncoding.EncodeToString(hash)
+	return secret
 }
 
 func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
@@ -288,7 +294,7 @@ func checkPassword(path string, pass []byte) bool {
 		panic(err)
 	}
 
-	var secret secretFile
+	var secret secretData
 	if err := yaml.Unmarshal(data, &secret); err != nil { // Secret is YAML for readability.
 		panic(err)
 	}
