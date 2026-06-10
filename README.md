@@ -68,11 +68,11 @@ strict authentication:
 
 After wrong passwords, the server waits increasingly longer:
 
-```text
-delay = wrong_attempts * wrong_attempts * 3 minutes
+```go
+delay = wrong_attempts * wrong_attempts * 3 minutes // 3 can be changed in config
 ```
 
-On the tenth wrong password, the server disables and stops itself with `systemctl`. (In `--dev` mode it only logs what it would do, does not wait after wrong passwords, and exits at the limit.)
+On the tenth *(can be changed in config)* wrong password, the server disables and stops itself with `systemctl`. (In `--dev` mode it only logs what it would do, does not wait after wrong passwords, and exits at the limit.)
 
 ---
 
@@ -174,9 +174,11 @@ TLS:
 
 ```yaml
 Server:
-  listen: 0.0.0.0   # optional, default 0.0.0.0
-  port: 47112       # optional, default 47112
-  timeout: 5        # optional, default 5 seconds
+  listen: 0.0.0.0                   # optional, default 0.0.0.0
+  port: 47112                       # optional, default 47112
+  timeout: 5                        # optional, default 5 seconds
+  wrong-password-limit: 10          # optional, default 10
+  wrong-password-delay-minutes: 3   # optional, default 3
 
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem

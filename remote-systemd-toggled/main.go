@@ -29,9 +29,6 @@ import (
 const (
 	defaultListen = "0.0.0.0"
 	selfService   = "remote-systemd-toggled.service"
-
-	wrongPasswordLimit = 10
-	wrongPasswordDelay = 3 * time.Minute
 )
 
 type secretFile struct {
@@ -219,7 +216,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 
 	ok := checkPassword(filepath.Join(configDir, "secret"), pass)
 	if !ok {
-		wrongPassword(dev)
+		wrongPassword(cfg, dev)
 		return
 	}
 
@@ -261,22 +258,22 @@ func checkClientCN(conn net.Conn, want string) bool {
 	return true
 }
 
-func wrongPassword(dev bool) {
+func wrongPassword(cfg common.Config, dev bool) {
 	wrongPasses++
 
 	logger.Printf("wrong password attempt %d", wrongPasses)
-	if wrongPasses >= wrongPasswordLimit {
+	if wrongPasses >= cfg.Server.WrongPasswordLimit {
 		if dev {
 			logger.Printf("wrong password limit reached, would disable and stop %s", selfService)
 			os.Exit(1)
 		}
-		logger.Print("wrong password limit reached, disabling service", "limit", wrongPasswordLimit)
+		logger.Print("wrong password limit reached, disabling service", "limit", cfg.Server.WrongPasswordLimit)
 		runSystemctl("disable", selfService)
 		runSystemctl("stop", selfService)
 		return
 	}
 
-	delay := time.Duration(wrongPasses*wrongPasses) * wrongPasswordDelay
+	delay := time.Duration(wrongPasses*wrongPasses) * time.Duration(cfg.Server.WrongPasswordDelayMinutes) * time.Minute
 	if dev {
 		logger.Printf("would wait after wrong password: %s", delay)
 		return

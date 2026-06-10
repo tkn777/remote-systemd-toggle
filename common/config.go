@@ -15,10 +15,12 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Listen  string `yaml:"listen"`
-	Address string `yaml:"address"`
-	Port    int    `yaml:"port"`
-	Timeout int    `yaml:"timeout"`
+	Listen                    string `yaml:"listen"`
+	Address                   string `yaml:"address"`
+	Port                      int    `yaml:"port"`
+	Timeout                   int    `yaml:"timeout"`
+	WrongPasswordLimit        int    `yaml:"wrong-password-limit"`
+	WrongPasswordDelayMinutes int    `yaml:"wrong-password-delay-minutes"`
 }
 
 type TLSConfig struct {
@@ -60,6 +62,12 @@ func LoadConfigPath(path string) LoadedConfig {
 	}
 	if cfg.Server.Timeout == 0 {
 		cfg.Server.Timeout = 5
+	}
+	if cfg.Server.WrongPasswordLimit == 0 {
+		cfg.Server.WrongPasswordLimit = 10
+	}
+	if cfg.Server.WrongPasswordDelayMinutes == 0 {
+		cfg.Server.WrongPasswordDelayMinutes = 3
 	}
 
 	return LoadedConfig{

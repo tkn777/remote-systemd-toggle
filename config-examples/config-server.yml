@@ -1,13 +1,15 @@
 Server:
-  listen: 0.0.0.0 # optional, default 0.0.0.0
-  port: 47112 # optional, default 47112
-  timeout: 5 # optional, default 5 seconds
+  listen: 0.0.0.0   # optional, default 0.0.0.0
+  port: 47112       # optional, default 47112
+  timeout: 5        # optional, default 5 seconds
+  wrong-password-limit: 10         # optional, default 10
+  wrong-password-delay-minutes: 3  # optional, default 3
 
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
   client-ca-cert: /etc/remote-systemd-toggle/client-ca.crt
-  client-cn: remote-systemd-toggle-client # optional, verifies the client certificate CN when set
+  client-cn: remote-systemd-toggle-client  # optional, verifies the client certificate CN when set
 
 Service:
   name: example.service
