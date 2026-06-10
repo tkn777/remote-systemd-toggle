@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"net"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -83,6 +84,21 @@ func TestWrongPasswordDevMode(t *testing.T) {
 	}
 }
 
+func TestWrongPasswordLimitDevModeExits(t *testing.T) {
+	if os.Getenv("REMOTE_SYSTEMD_TOGGLE_EXIT_TEST") == "1" {
+		runWrongPasswordLimitExitTest(t)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestWrongPasswordLimitDevModeExits")
+	cmd.Env = append(os.Environ(), "REMOTE_SYSTEMD_TOGGLE_EXIT_TEST=1")
+	err := cmd.Run()
+	if exitErr, ok := err.(*exec.ExitError); ok && !exitErr.Success() {
+		return
+	}
+	t.Fatalf("err = %v, want non-zero exit", err)
+}
+
 func TestNewSecretAndCheckPassword(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "secret")
 	secret := newSecret([]byte("secret"))
@@ -136,6 +152,36 @@ func TestNewSecretAndCheckPassword(t *testing.T) {
 	if checkPassword(path, []byte("wrong")) {
 		t.Fatal("expected wrong password to fail")
 	}
+}
+
+func runWrongPasswordLimitExitTest(t *testing.T) {
+	logger = log.New(io.Discard, "", 0)
+	wrongPasses = 0
+
+	cfg, configDir, serverTLS, clientTLS := testSetup(t, "secret")
+	cfg.Server.WrongPasswordLimit = 2
+
+	ln1 := testListener(t, serverTLS)
+	done := serveOnce(t, ln1, configDir, cfg, true)
+
+	conn1 := testDial(t, ln1.Addr().String(), clientTLS)
+	if err := common.WriteRequest(conn1, common.CmdToggle, []byte("wrong")); err != nil {
+		t.Fatal(err)
+	}
+	if err := conn1.Close(); err != nil {
+		t.Fatal(err)
+	}
+	<-done
+
+	ln2 := testListener(t, serverTLS)
+	serveOnce(t, ln2, configDir, cfg, true)
+
+	conn2 := testDial(t, ln2.Addr().String(), clientTLS)
+	if err := common.WriteRequest(conn2, common.CmdToggle, []byte("wrong")); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+	t.Fatal("expected os.Exit")
 }
 
 func testSetup(t *testing.T, pass string) (common.Config, string, *tls.Config, *tls.Config) {
