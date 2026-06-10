@@ -40,6 +40,10 @@ func main() {
 		fmt.Println(version)
 		return
 	}
+	cmd := common.CmdToggle
+	if common.HasArg(os.Args[1:], "--status") {
+		cmd = common.CmdStatus
+	}
 
 	loaded := common.LoadConfig("config-client.yml")
 	cfg := loaded.Config
@@ -81,7 +85,14 @@ func main() {
 	if err := conn.SetDeadline(time.Now().Add(time.Duration(cfg.Server.Timeout) * time.Second)); err != nil {
 		panic(err)
 	}
-	if err := common.WritePassword(conn, pass); err != nil {
+	if err := common.WriteRequest(conn, cmd, pass); err != nil {
 		panic(err)
+	}
+	if cmd == common.CmdStatus {
+		status, err := common.ReadStatus(conn)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(common.StatusText(status))
 	}
 }

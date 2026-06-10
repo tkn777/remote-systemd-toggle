@@ -7,33 +7,67 @@ import (
 	"io"
 )
 
-func ReadPassword(r io.Reader) ([]byte, error) {
-	var lenbuf [2]byte
-	if _, err := io.ReadFull(r, lenbuf[:]); err != nil {
-		return nil, err
+const (
+	CmdToggle byte = 1
+	CmdStatus byte = 2
+
+	StatusInactive byte = 0
+	StatusActive   byte = 1
+	StatusFailed   byte = 2
+	StatusUnknown  byte = 3
+)
+
+func ReadRequest(r io.Reader) (byte, []byte, error) {
+	var hdr [3]byte
+	if _, err := io.ReadFull(r, hdr[:]); err != nil {
+		return 0, nil, err
 	}
 
-	pass := make([]byte, binary.BigEndian.Uint16(lenbuf[:]))
+	pass := make([]byte, binary.BigEndian.Uint16(hdr[1:]))
 	if _, err := io.ReadFull(r, pass); err != nil {
 		Wipe(pass)
-		return nil, err
+		return 0, nil, err
 	}
 
-	return pass, nil
+	return hdr[0], pass, nil
 }
 
-func WritePassword(w io.Writer, pass []byte) error {
+func WriteRequest(w io.Writer, cmd byte, pass []byte) error {
 	if len(pass) > 65535 {
 		return fmt.Errorf("password too long")
 	}
 
-	var lenbuf [2]byte
-	binary.BigEndian.PutUint16(lenbuf[:], uint16(len(pass)))
+	var hdr [3]byte
+	hdr[0] = cmd
+	binary.BigEndian.PutUint16(hdr[1:], uint16(len(pass)))
 
-	if err := writeAll(w, lenbuf[:]); err != nil {
+	if err := writeAll(w, hdr[:]); err != nil {
 		return err
 	}
 	return writeAll(w, pass)
+}
+
+func ReadStatus(r io.Reader) (byte, error) {
+	var b [1]byte
+	_, err := io.ReadFull(r, b[:])
+	return b[0], err
+}
+
+func WriteStatus(w io.Writer, status byte) error {
+	return writeAll(w, []byte{status})
+}
+
+func StatusText(status byte) string {
+	switch status {
+	case StatusInactive:
+		return "inactive"
+	case StatusActive:
+		return "active"
+	case StatusFailed:
+		return "failed"
+	default:
+		return "unknown"
+	}
 }
 
 func Wipe(b []byte) {

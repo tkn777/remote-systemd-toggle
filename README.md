@@ -39,9 +39,11 @@ password storage. The server is intended to run as root because it calls
 
 ## 🚀 Usage
 
-1) The client prompts for a password and sends it in one request to the server and exits.\
+1) `systemd-service-toggle` toggles the configured service.
+2) `systemd-service-toggle --status` prints `active`, `inactive`, `failed`, or `unknown`.
+3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
-2) The server accepts one connection at a time, reads one password frame, verifies it, and toggles the configured systemd service.
+4) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
 
 ---
 
@@ -55,6 +57,7 @@ strict authentication:
 - the server verifies the client certificate against `TLS.client-ca-cert`
 - the server can additionally verify the client certificate CN with `TLS.client-cn`
 - the client verifies the server certificate using system CAs plus optional `TLS.server-ca-cert`
+- toggle and status requests both require mTLS and the password
 - passwords are read through a hidden prompt unless `--password` is used for scripts
 - passwords are never logged
 - password bytes are wiped after use where practical
@@ -246,6 +249,7 @@ Development mode is completely non-destructive:
 
 - Logs are written to stdout.
 - The configured service is never started or stopped. The server only logs what it would do.
+- Status requests return `unknown`; the server only logs that it would read the service status.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
 

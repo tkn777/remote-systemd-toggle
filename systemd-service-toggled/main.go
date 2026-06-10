@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"golang.org/x/crypto/argon2"
@@ -205,7 +206,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 		return
 	}
 
-	pass, err := common.ReadPassword(conn)
+	cmd, pass, err := common.ReadRequest(conn)
 	if err != nil {
 		logger.Printf("read failed: %v", err)
 		return
@@ -219,7 +220,16 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	}
 
 	wrongPasses = 0
-	toggleService(cfg, dev)
+	switch cmd {
+	case common.CmdToggle:
+		toggleService(cfg, dev)
+	case common.CmdStatus:
+		if err := common.WriteStatus(conn, serviceStatus(cfg, dev)); err != nil {
+			logger.Printf("status write failed: %v", err)
+		}
+	default:
+		logger.Printf("unknown command: %d", cmd)
+	}
 }
 
 func checkClientCN(conn net.Conn, want string) bool {
@@ -306,8 +316,7 @@ func toggleService(cfg common.Config, dev bool) {
 		return
 	}
 
-	cmd := exec.Command("systemctl", "is-active", "--quiet", service)
-	if err := cmd.Run(); err == nil {
+	if serviceStatus(cfg, false) == common.StatusActive {
 		runSystemctl("stop", service)
 		logger.Printf("stopped %s", service)
 		return
@@ -315,6 +324,29 @@ func toggleService(cfg common.Config, dev bool) {
 
 	runSystemctl("start", service)
 	logger.Printf("started %s", service)
+}
+
+func serviceStatus(cfg common.Config, dev bool) byte {
+	service := cfg.Service.Name
+	if dev {
+		logger.Printf("dev mode: would read status of %s", service)
+		return common.StatusUnknown
+	}
+
+	out, err := exec.Command("systemctl", "is-active", service).Output()
+	switch strings.TrimSpace(string(out)) {
+	case "active":
+		return common.StatusActive
+	case "inactive":
+		return common.StatusInactive
+	case "failed":
+		return common.StatusFailed
+	default:
+		if err != nil {
+			logger.Printf("status read failed: %v", err)
+		}
+		return common.StatusUnknown
+	}
 }
 
 func runSystemctl(action, service string) {
