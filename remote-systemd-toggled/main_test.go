@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -97,6 +98,65 @@ func TestWrongPasswordLimitDevModeExits(t *testing.T) {
 		return
 	}
 	t.Fatalf("err = %v, want non-zero exit", err)
+}
+
+func TestServiceStatusWithFakeSystemctl(t *testing.T) {
+	logPath := installFakeSystemctl(t, "active")
+	cfg := testServiceConfig()
+
+	if got := serviceStatus(cfg, false); got != common.StatusActive {
+		t.Fatalf("active status = %d, want %d", got, common.StatusActive)
+	}
+
+	t.Setenv("SYSTEMCTL_STATUS", "inactive")
+	if got := serviceStatus(cfg, false); got != common.StatusInactive {
+		t.Fatalf("inactive status = %d, want %d", got, common.StatusInactive)
+	}
+
+	t.Setenv("SYSTEMCTL_STATUS", "failed")
+	if got := serviceStatus(cfg, false); got != common.StatusFailed {
+		t.Fatalf("failed status = %d, want %d", got, common.StatusFailed)
+	}
+
+	t.Setenv("SYSTEMCTL_STATUS", "unknown")
+	if got := serviceStatus(cfg, false); got != common.StatusUnknown {
+		t.Fatalf("unknown status = %d, want %d", got, common.StatusUnknown)
+	}
+
+	if log := readSystemctlLog(t, logPath); strings.Count(log, "is-active example.service\n") != 4 {
+		t.Fatalf("log = %q", log)
+	}
+}
+
+func TestToggleServiceWithFakeSystemctl(t *testing.T) {
+	logPath := installFakeSystemctl(t, "active")
+	toggleService(testServiceConfig(), false)
+	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstop example.service\n" {
+		t.Fatalf("active toggle log = %q", log)
+	}
+
+	logPath = installFakeSystemctl(t, "inactive")
+	toggleService(testServiceConfig(), false)
+	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstart example.service\n" {
+		t.Fatalf("inactive toggle log = %q", log)
+	}
+}
+
+func TestWrongPasswordLimitRunsSystemctl(t *testing.T) {
+	logger = log.New(io.Discard, "", 0)
+	wrongPasses = 1
+	logPath := installFakeSystemctl(t, "inactive")
+
+	wrongPassword(common.Config{
+		Server: common.ServerConfig{
+			WrongPasswordLimit:        2,
+			WrongPasswordDelayMinutes: 3,
+		},
+	}, false)
+
+	if log := readSystemctlLog(t, logPath); log != "disable remote-systemd-toggled.service\nstop remote-systemd-toggled.service\n" {
+		t.Fatalf("log = %q", log)
+	}
 }
 
 func TestNewSecretAndCheckPassword(t *testing.T) {
@@ -182,6 +242,54 @@ func runWrongPasswordLimitExitTest(t *testing.T) {
 	}
 	time.Sleep(500 * time.Millisecond)
 	t.Fatal("expected os.Exit")
+}
+
+func testServiceConfig() common.Config {
+	return common.Config{
+		Service: common.ServiceConfig{
+			Name: "example.service",
+		},
+	}
+}
+
+func installFakeSystemctl(t *testing.T, status string) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "systemctl.log")
+	script := filepath.Join(dir, "systemctl")
+	data := `#!/bin/sh
+printf '%s\n' "$*" >> "$SYSTEMCTL_LOG"
+case "$1" in
+	is-active)
+		printf '%s\n' "$SYSTEMCTL_STATUS"
+		[ "$SYSTEMCTL_STATUS" = active ]
+		;;
+	start|stop|disable)
+		exit 0
+		;;
+	*)
+		exit 1
+		;;
+esac
+`
+	if err := os.WriteFile(script, []byte(data), 0700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("SYSTEMCTL_LOG", logPath)
+	t.Setenv("SYSTEMCTL_STATUS", status)
+	return logPath
+}
+
+func readSystemctlLog(t *testing.T, path string) string {
+	t.Helper()
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
 }
 
 func testSetup(t *testing.T, pass string) (common.Config, string, *tls.Config, *tls.Config) {
