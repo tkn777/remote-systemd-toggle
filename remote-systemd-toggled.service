@@ -1,5 +1,5 @@
 [Unit]
-Description=systemd service toggle daemon
+Description=remote systemd service toggle daemon
 After=network-online.target
 Wants=network-online.target
 
