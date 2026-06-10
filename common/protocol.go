@@ -1,4 +1,4 @@
-// Package common contains shared config and wire protocol helpers for systemd-service-toggle.
+// Package common contains shared config and wire protocol helpers for remote-systemd-toggle.
 package common
 
 import (

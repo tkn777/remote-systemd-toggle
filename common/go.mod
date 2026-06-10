@@ -1,4 +1,4 @@
-module systemd-service-toggle/common
+module remote-systemd-toggle/common
 
 go 1.26
 

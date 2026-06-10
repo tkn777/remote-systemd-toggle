@@ -1,4 +1,4 @@
-// Package main implements the systemd-service-toggle TLS client.
+// Package main implements the remote-systemd-toggle TLS client.
 package main
 
 import (
@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	"systemd-service-toggle/common"
+	"remote-systemd-toggle/common"
 
 	"golang.org/x/term"
 )

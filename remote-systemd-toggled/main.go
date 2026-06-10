@@ -1,4 +1,4 @@
-// Package main implements the systemd-service-toggled TLS server.
+// Package main implements the remote-systemd-toggled TLS server.
 package main
 
 import (
@@ -22,12 +22,12 @@ import (
 	"golang.org/x/term"
 	"gopkg.in/yaml.v3"
 
-	"systemd-service-toggle/common"
+	"remote-systemd-toggle/common"
 )
 
 const (
 	defaultListen = "0.0.0.0"
-	selfService   = "systemd-service-toggled.service"
+	selfService   = "remote-systemd-toggled.service"
 
 	wrongPasswordLimit = 10
 	wrongPasswordDelay = 3 * time.Minute
@@ -116,7 +116,7 @@ func setupLog(stdout bool) {
 	}
 
 	var err error
-	syslogOut, err = syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "systemd-service-toggled")
+	syslogOut, err = syslog.New(syslog.LOG_DAEMON|syslog.LOG_INFO, "remote-systemd-toggled")
 	if err != nil {
 		panic(err)
 	}

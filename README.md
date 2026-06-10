@@ -1,7 +1,7 @@
-# 🔐 systemd-service-toggle
+# 🔐 remote-systemd-toggle
 
 <p align="left">
-  <img src="resources/main-logo.png" alt="systemd-service-toggle" height=200>
+  <img src="resources/project-logo.png" alt="remote-systemd-toggle" height=200>
 </p>
 
 ---
@@ -20,7 +20,7 @@
 
 ## ℹ️ Description
 
-`systemd-service-toggle` is a small Go client/server tool for toggling a
+`remote-systemd-toggle` is a small Go client/server tool for toggling a
 configured systemd service remotely.
 
 It uses TLS 1.3 with mutual TLS, an additional password check, and Argon2id for
@@ -31,16 +31,16 @@ password storage. The server is intended to run as root because it calls
 
 ## 🧩 Components
 
-- `systemd-service-toggled`: TLS server
-- `systemd-service-toggle`: TLS client
+- `remote-systemd-toggled`: TLS server
+- `remote-systemd-toggle`: TLS client
 - `common`: shared config and wire protocol code
 
 ---
 
 ## 🚀 Usage
 
-1) `systemd-service-toggle` toggles the configured service.
-2) `systemd-service-toggle --status` prints the current status: `active`, `inactive`, `failed`, or `unknown`.
+1) `remote-systemd-toggle` toggles the configured service.
+2) `remote-systemd-toggle --status` prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
 4) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
@@ -91,8 +91,8 @@ You can use the Debian repository provided by `thk-systems.net` to receive autom
 
 ```bash
 curl -fsSL https://debian.thk-systems.net/repo-install.sh | sudo sh
-sudo apt install systemd-service-toggle-server  (or/and)
-sudo apt install systemd-service-toggle-client
+sudo apt install remote-systemd-toggle-server  (or/and)
+sudo apt install remote-systemd-toggle-client
 ```
 
 ---
@@ -104,19 +104,19 @@ First get source code tarball from a release (or clone the repository, but this 
 #### Build the client:
 
 ```sh
-go build -o systemd-service-toggle ./systemd-service-toggle
+go build -o remote-systemd-toggle ./remote-systemd-toggle
 ```
 
 #### Build the server:
 
 ```sh
-go build -o systemd-service-toggled ./systemd-service-toggled
+go build -o remote-systemd-toggled ./remote-systemd-toggled
 ```
 
 #### Cross-compile the client for Windows:
 
 ```sh
-GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-service-toggle
+GOOS=windows GOARCH=amd64 go build -o remote-systemd-toggle.exe ./remote-systemd-toggle
 ```
 
 ---
@@ -126,8 +126,8 @@ GOOS=windows GOARCH=amd64 go build -o systemd-service-toggle.exe ./systemd-servi
 Both binaries support `--version`:
 
 ```sh
-systemd-service-toggle --version
-systemd-service-toggled --version
+remote-systemd-toggle --version
+remote-systemd-toggled --version
 ```
 
 ---
@@ -137,20 +137,20 @@ systemd-service-toggled --version
 The client searches:
 
 ```text
-~/.config/systemd-service-toggle/config-client.yml
-~/.systemd-service-toggle/config-client.yml
-/etc/systemd-service-toggle/config-client.yml
+~/.config/remote-systemd-toggle/config-client.yml
+~/.remote-systemd-toggle/config-client.yml
+/etc/remote-systemd-toggle/config-client.yml
 ```
 
 The server searches:
 
 ```text
-~/.config/systemd-service-toggle/config-server.yml
-~/.systemd-service-toggle/config-server.yml
-/etc/systemd-service-toggle/config-server.yml
+~/.config/remote-systemd-toggle/config-server.yml
+~/.remote-systemd-toggle/config-server.yml
+/etc/remote-systemd-toggle/config-server.yml
 ```
 
-If you are using Windows, you should create a `.config` or a `.systemd-service-toggle` directory in your user`s home directory.
+If you are using Windows, you should create a `.config` or a `.remote-systemd-toggle` directory in your user`s home directory.
 
 Example configs are in `config-examples/`.
 
@@ -163,9 +163,9 @@ Server:
   timeout: 5    # optional, default 5 seconds
 
 TLS:
-  cert: /home/<user>/.config/systemd-service-toggle/client.crt
-  key: /home/<user>/.config/systemd-service-toggle/client.key
-  server-ca-cert: /home/<user>/.config/systemd-service-toggle/server-ca.crt   # optional, extends system CAs
+  cert: /home/<user>/.config/remote-systemd-toggle/client.crt
+  key: /home/<user>/.config/remote-systemd-toggle/client.key
+  server-ca-cert: /home/<user>/.config/remote-systemd-toggle/server-ca.crt   # optional, extends system CAs
 ```
 
 (see below how to create certificates)
@@ -181,8 +181,8 @@ Server:
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
-  client-ca-cert: /etc/systemd-service-toggle/client-ca.crt
-  client-cn: systemd-service-toggle-client   # optional, verifies the client certificate CN when set
+  client-ca-cert: /etc/remote-systemd-toggle/client-ca.crt
+  client-cn: remote-systemd-toggle-client   # optional, verifies the client certificate CN when set
 
 Service:
   name: example.service
@@ -195,7 +195,7 @@ Service:
 Create or replace the server-side password hash:
 
 ```sh
-systemd-service-toggled --passwd
+remote-systemd-toggled --passwd
 ```
 
 This command prompts for a password, reads the server config, writes `secret` next to it, and exits.
@@ -209,7 +209,7 @@ OpenSSL helper scripts are provided in `cert-generation-examples/`.
 #### Create a client CA and client certificate:
 
 ```sh
-./cert-generation-examples/create-client-cert.sh client-certs systemd-service-toggle-client
+./cert-generation-examples/create-client-cert.sh client-certs remote-systemd-toggle-client
 ```
 
 #### Create a server CA and server certificate for development:
@@ -229,7 +229,7 @@ still be issued by your private client CA.
 An example unit file is provided:
 
 ```text
-systemd-service-toggled.service
+remote-systemd-toggled.service
 ```
 
 Install it according to your distribution's systemd conventions and adjust
@@ -242,7 +242,7 @@ paths if needed.
 Run the server in development mode:
 
 ```sh
-systemd-service-toggled --dev
+remote-systemd-toggled --dev
 ```
 
 Development mode is completely non-destructive:
@@ -252,7 +252,7 @@ Development mode is completely non-destructive:
 - Status requests return `unknown`; the server only logs that it would read the service status.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
-- `systemd-service-toggle --status` always returns `unknown` and does not check the service status.
+- `remote-systemd-toggle --status` always returns `unknown` and does not check the service status.
 
 ---
 

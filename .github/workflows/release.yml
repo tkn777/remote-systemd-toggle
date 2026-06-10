@@ -56,6 +56,6 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          name: systemd-service-toggle ${{ github.ref_name }}
+          name: remote-systemd-toggle ${{ github.ref_name }}
           prerelease: ${{ steps.version.outputs.prerelease }}
           files: dist/*

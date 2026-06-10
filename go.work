@@ -2,6 +2,6 @@ go 1.26.0
 
 use (
 	./common
-	./systemd-service-toggle
-	./systemd-service-toggled
+	./remote-systemd-toggle
+	./remote-systemd-toggled
 )

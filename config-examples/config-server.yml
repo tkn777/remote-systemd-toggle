@@ -6,8 +6,8 @@ Server:
 TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
-  client-ca-cert: /etc/systemd-service-toggle/client-ca.crt
-  client-cn: systemd-service-toggle-client # optional, verifies the client certificate CN when set
+  client-ca-cert: /etc/remote-systemd-toggle/client-ca.crt
+  client-cn: remote-systemd-toggle-client # optional, verifies the client certificate CN when set
 
 Service:
   name: example.service

@@ -1,4 +1,4 @@
-// Package common contains shared config and wire protocol helpers for systemd-service-toggle.
+// Package common contains shared config and wire protocol helpers for remote-systemd-toggle.
 package common
 
 import (
@@ -76,9 +76,9 @@ func FindConfig(name string) (string, string) {
 	}
 
 	paths := []string{
-		filepath.Join(home, ".config", "systemd-service-toggle", name),
-		filepath.Join(home, ".systemd-service-toggle", name),
-		filepath.Join("/etc", "systemd-service-toggle", name),
+		filepath.Join(home, ".config", "remote-systemd-toggle", name),
+		filepath.Join(home, ".remote-systemd-toggle", name),
+		filepath.Join("/etc", "remote-systemd-toggle", name),
 	}
 
 	for _, path := range paths {

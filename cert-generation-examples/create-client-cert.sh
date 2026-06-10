@@ -3,8 +3,8 @@ set -eu
 umask 077
 
 OUT_DIR="${1:-client-certs}"
-CLIENT_NAME="${2:-systemd-service-toggle-client}"
-CLIENT_CA_CN="${CLIENT_CA_CN:-systemd-service-toggle client CA}"
+CLIENT_NAME="${2:-remote-systemd-toggle-client}"
+CLIENT_CA_CN="${CLIENT_CA_CN:-remote-systemd-toggle client CA}"
 CLIENT_CN="${CLIENT_CN:-$CLIENT_NAME}"
 DAYS="${DAYS:-36500}"
 

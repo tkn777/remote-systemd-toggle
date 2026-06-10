@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=simple
 User=root
 Group=root
-ExecStart=/usr/local/bin/systemd-service-toggled
+ExecStart=/usr/local/bin/remote-systemd-toggled
 Restart=on-failure
 RestartSec=5s
 

@@ -21,8 +21,8 @@ Discussion first. This helps avoid unnecessary work before implementation.
 Run formatting and tests before submitting changes:
 
 ```sh
-gofmt -w common/*.go systemd-service-toggle/*.go systemd-service-toggled/*.go
-go test ./common/... ./systemd-service-toggle/... ./systemd-service-toggled/...
+gofmt -w common/*.go remote-systemd-toggle/*.go remote-systemd-toggled/*.go
+go test ./common/... ./remote-systemd-toggle/... ./remote-systemd-toggled/...
 ```
 
 If you change shell scripts, check their syntax:
