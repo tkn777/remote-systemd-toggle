@@ -40,7 +40,7 @@ password storage. The server is intended to run as root because it calls
 ## 🚀 Usage
 
 1) `systemd-service-toggle` toggles the configured service.
-2) `systemd-service-toggle --status` prints `active`, `inactive`, `failed`, or `unknown`.
+2) `systemd-service-toggle --status` prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
 4) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
@@ -252,6 +252,7 @@ Development mode is completely non-destructive:
 - Status requests return `unknown`; the server only logs that it would read the service status.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
+- `systemd-service-toggle --status` always returns `unknown` and does not check the service status.
 
 ---
 
