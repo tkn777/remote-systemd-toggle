@@ -1,7 +1,7 @@
 # 🔐 remote-systemd-toggle
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/tkn777/retentions)](https://github.com/tkn777/remote-systemd-toggle/releases)
+[![GitHub release](https://img.shields.io/github/v/release/tkn777/remote-systemd-toggle)](https://github.com/tkn777/remote-systemd-toggle/releases)
 
 <p align="left">
   <img src="resources/project-logo.png" alt="remote-systemd-toggle" height=200>
