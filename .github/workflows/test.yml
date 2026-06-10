@@ -26,5 +26,5 @@ jobs:
         shell: sh
         run: |
           go list -f '{{.Dir}}' -m | while IFS= read -r dir; do
-            (cd "$dir" && go test ./...)
+            (cd "$dir" && go test -v ./...)
           done
