@@ -83,6 +83,61 @@ func TestWrongPasswordDevMode(t *testing.T) {
 	}
 }
 
+func TestNewSecretAndCheckPassword(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "secret")
+	secret := newSecret([]byte("secret"))
+
+	if secret.Time != 5 {
+		t.Fatalf("time = %d, want 5", secret.Time)
+	}
+	if secret.Memory != 64*1024 {
+		t.Fatalf("memory = %d, want %d", secret.Memory, 64*1024)
+	}
+	if secret.Threads != 1 {
+		t.Fatalf("threads = %d, want 1", secret.Threads)
+	}
+	if secret.KeyLen != 32 {
+		t.Fatalf("key len = %d, want 32", secret.KeyLen)
+	}
+
+	salt, err := base64.StdEncoding.DecodeString(secret.Salt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(salt) != 16 {
+		t.Fatalf("salt length = %d, want 16", len(salt))
+	}
+	hash, err := base64.StdEncoding.DecodeString(secret.Hash)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(hash) != int(secret.KeyLen) {
+		t.Fatalf("hash length = %d, want %d", len(hash), secret.KeyLen)
+	}
+
+	data, err := yaml.Marshal(secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0600 {
+		t.Fatalf("mode = %04o, want 0600", info.Mode().Perm())
+	}
+
+	if !checkPassword(path, []byte("secret")) {
+		t.Fatal("expected secret password to verify")
+	}
+	if checkPassword(path, []byte("wrong")) {
+		t.Fatal("expected wrong password to fail")
+	}
+}
+
 func testSetup(t *testing.T, pass string) (common.Config, string, *tls.Config, *tls.Config) {
 	t.Helper()
 
@@ -176,7 +231,7 @@ func writeTestSecret(t *testing.T, path string, pass []byte) {
 	t.Helper()
 
 	salt := []byte("1234567890123456")
-	secret := secretFile{
+	secret := secretData{
 		Salt:    base64.StdEncoding.EncodeToString(salt),
 		Time:    1,
 		Memory:  8 * 1024,
