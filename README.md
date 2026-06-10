@@ -73,7 +73,7 @@ strict authentication:
 After wrong passwords, the server waits increasingly longer:
 
 ```go
-delay = wrong_attempts * wrong_attempts * 3 minutes // 3 can be changed in config
+delay = wrong_attempts * wrong_attempts * 3 minutes // '3 minutes' can be changed in config
 ```
 
 On the tenth *(can be changed in config)* wrong password, the server disables and stops itself with `systemctl`. (In `--dev` mode it only logs what it would do, does not wait after wrong passwords, and exits at the limit.)
