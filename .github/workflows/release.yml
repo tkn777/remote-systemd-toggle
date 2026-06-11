@@ -9,9 +9,13 @@ permissions:
   contents: write
 
 jobs:
+  govulncheck:
+    uses: ./.github/workflows/vulncheck.yml
+
   release:
     name: Build release
     runs-on: ubuntu-latest
+    needs: govulncheck
 
     steps:
       - name: Checkout
