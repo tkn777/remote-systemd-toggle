@@ -13,3 +13,10 @@ TLS:
 
 Service:
   name: example.service
+
+Secrets:
+  path: secrets.yml        # optional, default secrets.yml next to config; relative paths are relative to config
+  argon2-time: 5           # optional, default 5
+  argon2-memory: 65536     # optional, default 65536 KiB
+  argon2-threads: 1        # optional, default 1
+  argon2-key-len: 32       # optional, default 32 bytes

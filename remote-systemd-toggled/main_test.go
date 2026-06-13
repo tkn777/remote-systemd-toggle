@@ -160,8 +160,16 @@ func TestWrongPasswordLimitRunsSystemctl(t *testing.T) {
 }
 
 func TestNewSecretAndCheckPassword(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "secret")
-	secret := newSecret([]byte("secret"))
+	path := filepath.Join(t.TempDir(), "secrets.yml")
+	cfg := common.Config{
+		Secrets: common.SecretsConfig{
+			Argon2Time:    5,
+			Argon2Memory:  64 * 1024,
+			Argon2Threads: 1,
+			Argon2KeyLen:  32,
+		},
+	}
+	secret := newSecret([]byte("secret"), cfg)
 
 	if secret.Time != 5 {
 		t.Fatalf("time = %d, want 5", secret.Time)
@@ -211,6 +219,44 @@ func TestNewSecretAndCheckPassword(t *testing.T) {
 	}
 	if checkPassword(path, []byte("wrong")) {
 		t.Fatal("expected wrong password to fail")
+	}
+}
+
+func TestNewSecretUsesConfiguredArgon2Params(t *testing.T) {
+	secret := newSecret([]byte("secret"), common.Config{
+		Secrets: common.SecretsConfig{
+			Argon2Time:    2,
+			Argon2Memory:  16 * 1024,
+			Argon2Threads: 1,
+			Argon2KeyLen:  16,
+		},
+	})
+
+	if secret.Time != 2 {
+		t.Fatalf("time = %d, want 2", secret.Time)
+	}
+	if secret.Memory != 16*1024 {
+		t.Fatalf("memory = %d, want %d", secret.Memory, 16*1024)
+	}
+	if secret.Threads != 1 {
+		t.Fatalf("threads = %d, want 1", secret.Threads)
+	}
+	if secret.KeyLen != 16 {
+		t.Fatalf("key len = %d, want 16", secret.KeyLen)
+	}
+}
+
+func TestSecretPath(t *testing.T) {
+	configDir := t.TempDir()
+
+	if got := secretPath(configDir, common.Config{}); got != filepath.Join(configDir, "secrets.yml") {
+		t.Fatalf("default path = %q", got)
+	}
+	if got := secretPath(configDir, common.Config{Secrets: common.SecretsConfig{Path: "custom.yml"}}); got != filepath.Join(configDir, "custom.yml") {
+		t.Fatalf("relative path = %q", got)
+	}
+	if got := secretPath(configDir, common.Config{Secrets: common.SecretsConfig{Path: "/tmp/custom.yml"}}); got != "/tmp/custom.yml" {
+		t.Fatalf("absolute path = %q", got)
 	}
 }
 
@@ -300,7 +346,7 @@ func testSetup(t *testing.T, pass string) (common.Config, string, *tls.Config, *
 	wrongPasses = 0
 
 	dir := t.TempDir()
-	writeTestSecret(t, filepath.Join(dir, "secret"), []byte(pass))
+	writeTestSecret(t, filepath.Join(dir, "secrets.yml"), []byte(pass))
 
 	caCert, caKey := testCA(t)
 	serverCert := testCert(t, caCert, caKey, "localhost", true)

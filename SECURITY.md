@@ -30,7 +30,7 @@ Security-sensitive areas include:
 - certificate verification
 - password handling and logging
 - Argon2id parameter handling
-- secret file permissions
+- `secrets.yml` file permissions
 - config file permissions
 - systemctl command execution
 - wrong-password backoff and self-disable behavior

@@ -12,6 +12,7 @@ type Config struct {
 	Server  ServerConfig  `yaml:"Server"`
 	TLS     TLSConfig     `yaml:"TLS"`
 	Service ServiceConfig `yaml:"Service"`
+	Secrets SecretsConfig `yaml:"Secrets"`
 }
 
 type ServerConfig struct {
@@ -33,6 +34,14 @@ type TLSConfig struct {
 
 type ServiceConfig struct {
 	Name string `yaml:"name"`
+}
+
+type SecretsConfig struct {
+	Path          string `yaml:"path"`
+	Argon2Time    uint32 `yaml:"argon2-time"`
+	Argon2Memory  uint32 `yaml:"argon2-memory"`
+	Argon2Threads uint8  `yaml:"argon2-threads"`
+	Argon2KeyLen  uint32 `yaml:"argon2-key-len"`
 }
 
 type LoadedConfig struct {
@@ -68,6 +77,18 @@ func LoadConfigPath(path string) LoadedConfig {
 	}
 	if cfg.Server.WrongPasswordDelayMinutes == 0 {
 		cfg.Server.WrongPasswordDelayMinutes = 3
+	}
+	if cfg.Secrets.Argon2Time == 0 {
+		cfg.Secrets.Argon2Time = 5
+	}
+	if cfg.Secrets.Argon2Memory == 0 {
+		cfg.Secrets.Argon2Memory = 64 * 1024
+	}
+	if cfg.Secrets.Argon2Threads == 0 {
+		cfg.Secrets.Argon2Threads = 1
+	}
+	if cfg.Secrets.Argon2KeyLen == 0 {
+		cfg.Secrets.Argon2KeyLen = 32
 	}
 
 	return LoadedConfig{

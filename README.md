@@ -66,9 +66,9 @@ strict authentication:
 - passwords are never logged
 - password bytes are wiped after use where practical
 - the password hash is stored as Argon2id parameters plus salt/hash in YAML
-- the `secret` file is written with `0600`
+- the `secrets.yml` file is written with `0600`
 - the server config directory is corrected to `0700`
-- the server config and `secret` file are corrected to `0600`
+- the server config and `secrets.yml` file are corrected to `0600`
 
 After wrong passwords, the server waits increasingly longer:
 
@@ -192,6 +192,13 @@ TLS:
 
 Service:
   name: example.service
+
+Secrets:
+  path: secrets.yml        # optional, default secrets.yml next to config; relative paths are relative to config
+  argon2-time: 5           # optional, default 5
+  argon2-memory: 65536     # optional, default 65536 KiB
+  argon2-threads: 1        # optional, default 1
+  argon2-key-len: 32       # optional, default 32 bytes
 ```
 
 ---
@@ -204,7 +211,9 @@ Create or replace the server-side password hash:
 remote-systemd-toggled --passwd
 ```
 
-This command prompts for a password, reads the server config, writes `secret` next to it, and exits.
+This command prompts for a password, reads the server config, writes `secrets.yml`, and exits.
+
+Changing `Secrets.argon2-*` only affects newly generated password hashes. Run `remote-systemd-toggled --passwd` again after changing these values.
 
 ---
 

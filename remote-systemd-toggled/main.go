@@ -62,11 +62,11 @@ func main() {
 	setupLog(dev || passwd)
 
 	configPath, configDir := common.FindConfig("config-server.yml")
-	fixServerPerms(configDir, configPath)
 	loaded := common.LoadConfigPath(configPath)
+	fixServerPerms(configDir, configPath, loaded.Config)
 
 	if passwd {
-		writeSecret(filepath.Join(loaded.Dir, "secret"))
+		writeSecret(secretPath(loaded.Dir, loaded.Config), loaded.Config)
 		return
 	}
 
@@ -133,13 +133,13 @@ func warnf(format string, v ...any) {
 	logger.Print(msg)
 }
 
-func fixServerPerms(dir, configPath string) {
+func fixServerPerms(dir, configPath string, cfg common.Config) {
 	chmodIfNeeded(dir, 0700)
 	chmodIfNeeded(configPath, 0600)
 
-	secretPath := filepath.Join(dir, "secret")
-	if _, err := os.Stat(secretPath); err == nil {
-		chmodIfNeeded(secretPath, 0600)
+	path := secretPath(dir, cfg)
+	if _, err := os.Stat(path); err == nil {
+		chmodIfNeeded(path, 0600)
 	}
 }
 
@@ -157,7 +157,7 @@ func chmodIfNeeded(path string, mode os.FileMode) {
 	warnf("fixed permissions on %s to %04o", path, mode)
 }
 
-func writeSecret(path string) {
+func writeSecret(path string, cfg common.Config) {
 	fmt.Print("Password: ")
 	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Println()
@@ -166,7 +166,7 @@ func writeSecret(path string) {
 	}
 	defer common.Wipe(pass)
 
-	secret := newSecret(pass)
+	secret := newSecret(pass, cfg)
 
 	data, err := yaml.Marshal(secret)
 	if err != nil {
@@ -181,7 +181,7 @@ func writeSecret(path string) {
 	logger.Printf("wrote %s", path)
 }
 
-func newSecret(pass []byte) secretData {
+func newSecret(pass []byte, cfg common.Config) secretData {
 	salt := make([]byte, 16)
 	if _, err := rand.Read(salt); err != nil {
 		panic(err)
@@ -190,10 +190,10 @@ func newSecret(pass []byte) secretData {
 
 	secret := secretData{
 		Salt:    base64.StdEncoding.EncodeToString(salt),
-		Time:    5,
-		Memory:  64 * 1024,
-		Threads: 1,
-		KeyLen:  32,
+		Time:    cfg.Secrets.Argon2Time,
+		Memory:  cfg.Secrets.Argon2Memory,
+		Threads: cfg.Secrets.Argon2Threads,
+		KeyLen:  cfg.Secrets.Argon2KeyLen,
 	}
 	hash := argon2.IDKey(pass, salt, secret.Time, secret.Memory, secret.Threads, secret.KeyLen)
 	defer common.Wipe(hash)
@@ -220,7 +220,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	}
 	defer common.Wipe(pass)
 
-	ok := checkPassword(filepath.Join(configDir, "secret"), pass)
+	ok := checkPassword(secretPath(configDir, cfg), pass)
 	if !ok {
 		wrongPassword(cfg, dev)
 		return
@@ -237,6 +237,16 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	default:
 		logger.Printf("unknown command: %d", cmd)
 	}
+}
+
+func secretPath(configDir string, cfg common.Config) string {
+	if cfg.Secrets.Path == "" {
+		return filepath.Join(configDir, "secrets.yml")
+	}
+	if filepath.IsAbs(cfg.Secrets.Path) {
+		return cfg.Secrets.Path
+	}
+	return filepath.Join(configDir, cfg.Secrets.Path)
 }
 
 func checkClientCN(conn net.Conn, want string) bool {
