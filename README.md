@@ -63,7 +63,7 @@ On the tenth *(can be changed in config)* wrong password, the server disables an
 
 1) Get a binary from a release or the debian repo or build one from the source
 2) Create certificates may be with `cert-generation-examples/` (for production, you just need to generate client certificates)
-3) Create the configuration file may be using `config-generation-examples/`
+3) Create the configuration file may be using `config-generation-examples/` as a template
 4) Activate the systemd unit to run the server (server only)
 5) Set a password using `remote-systemd-toggled --passwd` (server only)
 
