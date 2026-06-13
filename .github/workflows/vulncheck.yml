@@ -2,7 +2,7 @@ name: Vulnerability Check
 
 on:
   schedule:
-    - cron: "17 3 * * 1"
+    - cron: "17 3 * * *"
   workflow_dispatch:
   workflow_call:
 
