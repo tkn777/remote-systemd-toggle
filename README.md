@@ -133,6 +133,30 @@ GOOS=windows GOARCH=amd64 go build -o remote-systemd-toggle.exe ./remote-systemd
 
 ---
 
+## 📜 Certificates
+
+OpenSSL helper scripts are provided in `cert-generation-examples/`.
+
+#### Create a client CA and client certificate:
+
+```sh
+./cert-generation-examples/create-client-cert.sh client-certs remote-systemd-toggle-client
+```
+
+#### Create a server CA and server certificate for development:
+
+```sh
+./cert-generation-examples/create-server-cert.sh server-certs server.example.org
+```
+
+For production servers, a public CA certificate such as a certbot certificate is
+usually preferable for the server certificate. The client certificate should
+still be issued by your private client CA.
+
+It is recommended practice to store self-generated certificates in the configuration directory or in a subdirectory below it.
+
+---
+
 ## ⚙️ Configuration
 
 The client searches:
@@ -169,7 +193,7 @@ TLS:
   server-ca-cert: /home/<user>/.config/remote-systemd-toggle/server-ca.crt   # optional, extends system CAs
 ```
 
-(see below how to create certificates)
+(see above how to create certificates)
 
 ### 🖥️ Server Config
 
@@ -212,28 +236,6 @@ This command prompts for a password, reads the server config, writes `secrets.ym
 
 Changing `Secrets.argon2-*` in configuration only affects newly generated password hashes.\
 Run `remote-systemd-toggled --passwd` again after changing these values.
-
----
-
-## 📜 Certificates
-
-OpenSSL helper scripts are provided in `cert-generation-examples/`.
-
-#### Create a client CA and client certificate:
-
-```sh
-./cert-generation-examples/create-client-cert.sh client-certs remote-systemd-toggle-client
-```
-
-#### Create a server CA and server certificate for development:
-
-```sh
-./cert-generation-examples/create-server-cert.sh server-certs server.example.org
-```
-
-For production servers, a public CA certificate such as a certbot certificate is
-usually preferable for the server certificate. The client certificate should
-still be issued by your private client CA.
 
 ---
 
