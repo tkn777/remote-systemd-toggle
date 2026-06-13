@@ -85,7 +85,7 @@ func main() {
 
 	cert, err := tls.LoadX509KeyPair(cfg.TLS.Cert, cfg.TLS.Key)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to load TLS.cert %q and TLS.key %q: %v", cfg.TLS.Cert, cfg.TLS.Key, err))
 	}
 	clientCAs := x509.NewCertPool()
 	clientCA, err := os.ReadFile(cfg.TLS.ClientCACert)
@@ -93,7 +93,7 @@ func main() {
 		panic(fmt.Sprintf("failed to read TLS.client-ca-cert %q: %v", cfg.TLS.ClientCACert, err))
 	}
 	if !clientCAs.AppendCertsFromPEM(clientCA) {
-		panic("failed to load client-ca-cert")
+		panic(fmt.Sprintf("failed to load TLS.client-ca-cert %q", cfg.TLS.ClientCACert))
 	}
 
 	ln, err := tls.Listen("tcp", fmt.Sprintf("%s:%d", cfg.Server.Listen, cfg.Server.Port), &tls.Config{
@@ -154,13 +154,13 @@ func fixServerPerms(dir, configPath string, cfg common.Config) {
 func chmodIfNeeded(path string, mode os.FileMode) {
 	info, err := os.Stat(path)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to stat %s for permission fix: %v", path, err))
 	}
 	if info.Mode().Perm() == mode {
 		return
 	}
 	if err := os.Chmod(path, mode); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to chmod %s to %04o: %v", path, mode, err))
 	}
 	warnf("fixed permissions on %s to %04o", path, mode)
 }
@@ -181,10 +181,10 @@ func writeSecret(path string, cfg common.Config) {
 		panic(err)
 	}
 	if err := os.WriteFile(path, data, 0600); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to write secrets file %s: %v", path, err))
 	}
 	if err := os.Chmod(path, 0600); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to chmod secrets file %s to 0600: %v", path, err))
 	}
 	logger.Printf("wrote %s", path)
 }
@@ -320,21 +320,21 @@ func wrongPassword(cfg common.Config, dev bool) {
 func checkPassword(path string, pass []byte) bool {
 	data, err := os.ReadFile(path) // Read stored Argon2id parameters and hash.
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to read secrets file %s: %v", path, err))
 	}
 
 	var secret secretData
 	if err := yaml.Unmarshal(data, &secret); err != nil { // Secret is YAML for readability.
-		panic(err)
+		panic(fmt.Sprintf("failed to parse secrets file %s: %v", path, err))
 	}
 
 	salt, err := base64.StdEncoding.DecodeString(secret.Salt) // Argon2Id Salt is stored as base64 text.
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to decode salt in secrets file %s: %v", path, err))
 	}
 	want, err := base64.StdEncoding.DecodeString(secret.Hash) // Argon2id hash is stored as base64 text.
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to decode hash in secrets file %s: %v", path, err))
 	}
 	defer common.Wipe(salt)
 	defer common.Wipe(want)

@@ -58,12 +58,12 @@ func LoadConfig(name string) LoadedConfig {
 func LoadConfigPath(path string) LoadedConfig {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		panic("failed to read config " + path + ": " + err.Error())
 	}
 
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		panic(err)
+		panic("failed to parse config " + path + ": " + err.Error())
 	}
 
 	if cfg.Server.Port == 0 {
@@ -101,7 +101,7 @@ func LoadConfigPath(path string) LoadedConfig {
 func FindConfig(name string) (string, string) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		panic("failed to get user home directory: " + err.Error())
 	}
 
 	paths := []string{

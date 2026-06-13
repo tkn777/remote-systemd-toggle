@@ -64,16 +64,16 @@ func main() {
 	if cfg.TLS.ServerCACert != "" {
 		data, err := os.ReadFile(cfg.TLS.ServerCACert)
 		if err != nil {
-			panic(err)
+			panic(fmt.Sprintf("failed to read TLS.server-ca-cert %q: %v", cfg.TLS.ServerCACert, err))
 		}
 		if !certPool.AppendCertsFromPEM(data) {
-			panic("failed to load server-ca-cert")
+			panic(fmt.Sprintf("failed to load TLS.server-ca-cert %q", cfg.TLS.ServerCACert))
 		}
 	}
 
 	cert, err := tls.LoadX509KeyPair(cfg.TLS.Cert, cfg.TLS.Key)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to load TLS.cert %q and TLS.key %q: %v", cfg.TLS.Cert, cfg.TLS.Key, err))
 	}
 
 	pass := password()
