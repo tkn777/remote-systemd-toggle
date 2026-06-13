@@ -115,19 +115,19 @@ First get a source code tarball from a release, or clone the repository.
 
 #### Build the client:
 
-```sh
+```bash
 go build -o remote-systemd-toggle ./remote-systemd-toggle
 ```
 
 #### Build the server:
 
-```sh
+```bash
 go build -o remote-systemd-toggled ./remote-systemd-toggled
 ```
 
 #### Cross-compile the client for Windows:
 
-```sh
+```bash
 GOOS=windows GOARCH=amd64 go build -o remote-systemd-toggle.exe ./remote-systemd-toggle
 ```
 
@@ -135,25 +135,25 @@ GOOS=windows GOARCH=amd64 go build -o remote-systemd-toggle.exe ./remote-systemd
 
 ## 📜 Certificates
 
+It is recommended practice to store self-generated certificates in the configuration directory or in a subdirectory below it.
+
 OpenSSL helper scripts are provided in `cert-generation-examples/`.
 
 #### Create a client CA and client certificate:
 
-```sh
+```bash
 ./cert-generation-examples/create-client-cert.sh client-certs remote-systemd-toggle-client
 ```
 
 #### Create a server CA and server certificate for development:
 
-```sh
+```bash
 ./cert-generation-examples/create-server-cert.sh server-certs server.example.org
 ```
 
 For production servers, a public CA certificate such as a certbot certificate is
 usually preferable for the server certificate. The client certificate should
 still be issued by your private client CA.
-
-It is recommended practice to store self-generated certificates in the configuration directory or in a subdirectory below it.
 
 ---
 
@@ -228,7 +228,7 @@ Secrets:
 
 Create or replace the server-side password hash:
 
-```sh
+```bash
 remote-systemd-toggled --passwd
 ```
 
@@ -247,12 +247,13 @@ An example unit file is provided:
 remote-systemd-toggled.service
 ```
 
-Install it according to your distribution's systemd conventions and adjust
-paths if needed.
+The prebuilt Debian and RPM packages install this systemd unit file automatically, but they do not enable or start the service.
 
-Then enable and start the service (after it is configured):
+If you install from source or use the release tarball, install the unit file according to your distribution's systemd conventions and adjust paths if needed.
 
-```sh
+After the server has been configured, enable and start the service:
+
+```bash
 systemctl enable remote-systemd-toggled.service
 systemctl start remote-systemd-toggled.service
 ```
@@ -263,7 +264,7 @@ systemctl start remote-systemd-toggled.service
 
 Both binaries support `--version`:
 
-```sh
+```bash
 remote-systemd-toggle --version
 remote-systemd-toggled --version
 ```
@@ -272,8 +273,11 @@ remote-systemd-toggled --version
 
 ## ⚖️ Tradeoffs
 
-The tool panics intentionally in case of a configuration or similar problem.\
-This is not a bug, it is a feature. ;)
+The tool intentionally fails fast on configuration errors or similar unexpected conditions.
+
+This is a deliberate design choice: a misconfigured remote service toggle should stop immediately and loudly instead of continuing in an undefined or potentially unsafe state.
+
+In other words: panic is not a bug here — it is part of the safety model. 😉
 
 ---
 
@@ -305,7 +309,7 @@ Case ID: 254eb93e-f17d-4c6a-8c4b-4b9699f0435b
 
 Run the server in development mode:
 
-```sh
+```bash
 remote-systemd-toggled --dev
 ```
 
