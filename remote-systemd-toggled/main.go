@@ -279,7 +279,7 @@ func checkClientCN(conn net.Conn, want string) bool {
 		return false
 	}
 	if certs[0].Subject.CommonName != want {
-		logger.Printf("client certificate CN mismatch: %q", certs[0].Subject.CommonName)
+		logger.Printf("client certificate CN mismatch: expected %q, got %q", want, certs[0].Subject.CommonName)
 		return false
 	}
 	return true
