@@ -10,18 +10,6 @@
 
 ---
 
-## ⚠️ Experimental Software
-
-**This project is highly experimental and under active development.**
-
-**It is not production-ready and should not be used in any production environment under any circumstances.**
-
-**Expect bugs, incomplete features, configuration changes, data corruption, data loss, and incompatible updates.**
-
-**Use at your own risk. 🚧🔥**
-
----
-
 ## ℹ️ Description
 
 `remote-systemd-toggle` is a small Go client/server tool for toggling a
