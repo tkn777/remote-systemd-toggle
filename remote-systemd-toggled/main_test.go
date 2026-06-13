@@ -89,6 +89,29 @@ func TestMTLSRejectsMissingClientCertificate(t *testing.T) {
 	<-done
 }
 
+func TestMTLSRejectsClientCNMismatch(t *testing.T) {
+	cfg, configDir, serverTLS, clientTLS := testSetup(t, "secret")
+	cfg.TLS.ClientCN = "other-client"
+	ln := testListener(t, serverTLS)
+	done := serveOnce(t, ln, configDir, cfg, true)
+
+	conn := testDial(t, ln.Addr().String(), clientTLS)
+	defer conn.Close() //nolint:errcheck // Test cleanup.
+
+	if err := common.WriteRequest(conn, common.CmdStatus, []byte("secret")); err != nil {
+		t.Fatal(err)
+	}
+	status, err := common.ReadStatus(conn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status != common.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", status, common.StatusUnauthorized)
+	}
+
+	<-done
+}
+
 func TestWrongPasswordDevMode(t *testing.T) {
 	cfg, configDir, serverTLS, clientTLS := testSetup(t, "secret")
 	ln := testListener(t, serverTLS)

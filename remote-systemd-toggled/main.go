@@ -210,6 +210,9 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	}
 
 	if !checkClientCN(conn, cfg.TLS.ClientCN) {
+		if err := common.WriteStatus(conn, common.StatusUnauthorized); err != nil {
+			logger.Printf("status write failed: %v", err)
+		}
 		return
 	}
 
