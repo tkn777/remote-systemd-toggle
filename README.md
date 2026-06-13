@@ -61,27 +61,32 @@ On the tenth *(can be changed in config)* wrong password, the server disables an
 
 ## ⬇️ Installation (client and server)
 
-1) Get a binary from a release or the debian repo or build one from the source
-2) Create certificates may be with `cert-generation-examples/` (for production, you just need to generate client certificates)
-3) Create the configuration file may be using `config-generation-examples/` as a template
-4) Activate the systemd unit to run the server (server only)
-5) Set a password using `remote-systemd-toggled --passwd` (server only)
+1) Get a binary from a release or from the Debian repository, or build one from source.
+2) Create certificates, optionally using `cert-generation-examples/` (for production, you only need to generate client certificates).
+3) Create the configuration file, optionally using `config-examples/` as a template.
 
-You find detailed instructions for each step in the sections below.
+Detailed instructions for each step are provided in the sections below.
 
 ---
 
-## 🚀 Usage (client)
+## 🚀 Usage
 
-1) `remote-systemd-toggle` connects the configured server and toggles the configured service and prints the new status.
-2) `remote-systemd-toggle --status` connects the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
+### 🖥️ Server
+
+1) Enable the systemd unit to run the server (see below).
+2) Set a password using `remote-systemd-toggled --passwd` (see below).
+
+### 💻 Client
+
+1) `remote-systemd-toggle` connects to the configured server, toggles the configured service, and prints the new status.
+2) `remote-systemd-toggle --status` connects to the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
 4) If authentication fails, the client prints `unauthorized`.
 5) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.\
-   In case of a wrong password the server waits increasingly longer and then disables and stops itself.
+   If the password is wrong, the server waits increasingly longer and eventually disables and stops itself.
 
---
+---
 
 ## 📦 Release Artifacts
 
@@ -106,7 +111,7 @@ sudo apt install remote-systemd-toggle-client
 
 ## 🔨 Build
 
-First get source code tarball from a release (or clone the repository, but this is not recommended, because it is under development).
+First get a source code tarball from a release, or clone the repository.
 
 #### Build the client:
 
@@ -146,7 +151,7 @@ The server searches:
 /etc/remote-systemd-toggle/config-server.yml
 ```
 
-If you are using Windows, you should create a `.config` or a `.remote-systemd-toggle` directory in your user`s home directory.
+If you are using Windows, create a `.config` or `.remote-systemd-toggle` directory in your user's home directory.
 
 Example configs are in `config-examples/`.
 
@@ -154,7 +159,7 @@ Example configs are in `config-examples/`.
 
 ```yaml
 Server:
-  address: vpn.example.org
+  address: server.example.org
   port: 47112   # optional, default 47112
   timeout: 5    # optional, default 5 seconds
 
@@ -205,7 +210,8 @@ remote-systemd-toggled --passwd
 
 This command prompts for a password, reads the server config, writes `secrets.yml`, and exits.
 
-Changing `Secrets.argon2-*` only affects newly generated password hashes. Run `remote-systemd-toggled --passwd` again after changing these values.
+Changing `Secrets.argon2-*` in configuration only affects newly generated password hashes.\
+Run `remote-systemd-toggled --passwd` again after changing these values.
 
 ---
 
@@ -222,7 +228,7 @@ OpenSSL helper scripts are provided in `cert-generation-examples/`.
 #### Create a server CA and server certificate for development:
 
 ```sh
-./cert-generation-examples/create-server-cert.sh server-certs vpn.example.org
+./cert-generation-examples/create-server-cert.sh server-certs server.example.org
 ```
 
 For production servers, a public CA certificate such as a certbot certificate is
@@ -244,7 +250,7 @@ paths if needed.
 
 Then enable and start the service (after it is configured):
 
-```sh bash 
+```sh
 systemctl enable remote-systemd-toggled.service
 systemctl start remote-systemd-toggled.service
 ```
@@ -264,25 +270,32 @@ remote-systemd-toggled --version
 
 ## ⚖️ Tradeoffs
 
-The tool panics intentionally in case of a configuration or similar problem. \
+The tool panics intentionally in case of a configuration or similar problem.\
 This is not a bug, it is a feature. ;)
 
 ---
 
 ## ⚠️ Windows Binary Notice
 
-The Windows client binary is currently unsigned. Because this is a new FOSS project without publisher reputation, Microsoft Defender SmartScreen or antivirus products may warn about it.
+The Windows client binary is currently unsigned. Because this is a new FOSS project without an established publisher reputation, Microsoft Defender SmartScreen or antivirus products may warn about the executable or classify it as suspicious.
 
-The source code is public, release artifacts are built by GitHub Actions, and checksums are provided by GitHub releases. \
+The source code is public, release artifacts are built by GitHub Actions, and checksums are provided by GitHub releases.
 If you do not trust the prebuilt binary, please build the client from source.
 
-You can unblock the binary by executing (run as admin) on your own risk:
+If you trust the source, the release artifact, and the checksum, you may unblock the binary locally at your own risk.
+
+If necessary, run this command in an elevated PowerShell:
 
 ```powershell
 Unblock-File .\remote-systemd-toggle.exe
 
 Add-MpPreference -ExclusionPath "C:\<...>\remote-systemd-toggle.exe"
 ```
+
+Do not disable Microsoft Defender globally.
+
+Microsoft has been informed about this Defender false positive detection.\
+Case ID: 254eb93e-f17d-4c6a-8c4b-4b9699f0435b
 
 ---
 
@@ -303,6 +316,8 @@ Development mode is completely non-destructive:
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
 - `remote-systemd-toggle` and `remote-systemd-toggle --status` return `unknown` and do not check the service status.
 - Stacktraces are printed.
+
+The client has a `--dev` flag too, just to enable stacktraces.
 
 ---
 
