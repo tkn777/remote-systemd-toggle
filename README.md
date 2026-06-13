@@ -29,17 +29,6 @@ password storage. The server is intended to run as root because it calls
 
 ---
 
-## 🚀 Usage
-
-1) `remote-systemd-toggle` toggles the configured service and prints the new status.
-2) `remote-systemd-toggle --status` prints the current status: `active`, `inactive`, `failed`, or `unknown`.
-3) The client prompts for a password and sends one authenticated request to the server.\
-   For scripts, the client also accepts `--password <password>` and skips the prompt.
-4) If authentication fails, the client prints `unauthorized`.
-5) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
-
----
-
 ## 🛡️ Security Model
 
 The server is designed to be reachable over an untrusted network, but only with
@@ -69,6 +58,30 @@ delay = wrong_attempts * wrong_attempts * 3 minutes // '3 minutes' can be change
 On the tenth *(can be changed in config)* wrong password, the server disables and stops itself with `systemctl`. (In `--dev` mode it only logs what it would do, does not wait after wrong passwords, and exits at the limit.)
 
 ---
+
+## ⬇️ Installation (client and server)
+
+1) Get a binary from a release or the debian repo or build one from the source
+2) Create certificates may be with `cert-generation-examples/` (for production, you just need to generate client certificates)
+3) Create the configuration file may be using `config-generation-examples/`
+4) Activate the systemd unit to run the server (server only)
+5) Set a password using `remote-systemd-toggled --passwd` (server only)
+
+You find detailed instructions for each step in the sections below.
+
+---
+
+## 🚀 Usage (client)
+
+1) `remote-systemd-toggle` connects the configured server and toggles the configured service and prints the new status.
+2) `remote-systemd-toggle --status` connects the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
+3) The client prompts for a password and sends one authenticated request to the server.\
+   For scripts, the client also accepts `--password <password>` and skips the prompt.
+4) If authentication fails, the client prints `unauthorized`.
+5) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.\
+   In case of a wrong password the server waits increasingly longer and then disables and stops itself.
+
+--
 
 ## 📦 Release Artifacts
 
@@ -111,17 +124,6 @@ go build -o remote-systemd-toggled ./remote-systemd-toggled
 
 ```sh
 GOOS=windows GOARCH=amd64 go build -o remote-systemd-toggle.exe ./remote-systemd-toggle
-```
-
----
-
-## 🏷️ Version
-
-Both binaries support `--version`:
-
-```sh
-remote-systemd-toggle --version
-remote-systemd-toggled --version
 ```
 
 ---
@@ -245,6 +247,41 @@ Then enable and start the service (after it is configured):
 ```sh bash 
 systemctl enable remote-systemd-toggled.service
 systemctl start remote-systemd-toggled.service
+```
+
+---
+
+## 🏷️ Version
+
+Both binaries support `--version`:
+
+```sh
+remote-systemd-toggle --version
+remote-systemd-toggled --version
+```
+
+---
+
+## ⚖️ Tradeoffs
+
+The tool panics intentionally in case of a configuration or similar problem. \
+This is not a bug, it is a feature. ;)
+
+---
+
+## ⚠️ Windows Binary Notice
+
+The Windows client binary is currently unsigned. Because this is a new FOSS project without publisher reputation, Microsoft Defender SmartScreen or antivirus products may warn about it.
+
+The source code is public, release artifacts are built by GitHub Actions, and checksums are provided by GitHub releases. \
+If you do not trust the prebuilt binary, please build the client from source.
+
+You can unblock the binary by executing (run as admin) on your own risk:
+
+```powershell
+Unblock-File .\remote-systemd-toggle.exe
+
+Add-MpPreference -ExclusionPath "C:\<...>\remote-systemd-toggle.exe"
 ```
 
 ---
