@@ -43,11 +43,12 @@ password storage. The server is intended to run as root because it calls
 
 ## 🚀 Usage
 
-1) `remote-systemd-toggle` toggles the configured service.
+1) `remote-systemd-toggle` toggles the configured service and prints the new status.
 2) `remote-systemd-toggle --status` prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt.
-4) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
+4) If authentication fails, the client prints `unauthorized`.
+5) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.
 
 ---
 
@@ -62,6 +63,7 @@ strict authentication:
 - the server can additionally verify the client certificate CN with `TLS.client-cn`
 - the client verifies the server certificate using system CAs plus optional `TLS.server-ca-cert`
 - toggle and status requests both require mTLS and the password
+- every parsed request returns one status response after mTLS; wrong passwords return `unauthorized`
 - passwords are read through a hidden prompt unless `--password` is used for scripts
 - passwords are never logged
 - password bytes are wiped after use where practical
@@ -264,10 +266,10 @@ Development mode is completely non-destructive:
 
 - Logs are written to stdout.
 - The configured service is never started or stopped. The server only logs what it would do.
-- Status requests return `unknown`; the server only logs that it would read the service status.
+- Toggle and status requests return `unknown`; the server only logs what it would do.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
-- `remote-systemd-toggle --status` always returns `unknown` and does not check the service status.
+- `remote-systemd-toggle` and `remote-systemd-toggle --status` return `unknown` and do not check the service status.
 - Stacktraces are printed.
 
 ---

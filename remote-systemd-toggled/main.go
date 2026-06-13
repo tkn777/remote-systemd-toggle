@@ -222,6 +222,9 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 
 	ok := checkPassword(secretPath(configDir, cfg), pass)
 	if !ok {
+		if err := common.WriteStatus(conn, common.StatusUnauthorized); err != nil {
+			logger.Printf("status write failed: %v", err)
+		}
 		wrongPassword(cfg, dev)
 		return
 	}
@@ -229,13 +232,18 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	wrongPasses = 0
 	switch cmd {
 	case common.CmdToggle:
-		toggleService(cfg, dev)
+		if err := common.WriteStatus(conn, toggleService(cfg, dev)); err != nil {
+			logger.Printf("status write failed: %v", err)
+		}
 	case common.CmdStatus:
 		if err := common.WriteStatus(conn, serviceStatus(cfg, dev)); err != nil {
 			logger.Printf("status write failed: %v", err)
 		}
 	default:
 		logger.Printf("unknown command: %d", cmd)
+		if err := common.WriteStatus(conn, common.StatusUnknown); err != nil {
+			logger.Printf("status write failed: %v", err)
+		}
 	}
 }
 
@@ -326,21 +334,22 @@ func checkPassword(path string, pass []byte) bool {
 	return len(got) == len(want) && subtle.ConstantTimeCompare(got, want) == 1 // Constant-time compare avoids leaking prefix matches.
 }
 
-func toggleService(cfg common.Config, dev bool) {
+func toggleService(cfg common.Config, dev bool) byte {
 	service := cfg.Service.Name
 	if dev {
 		logger.Printf("dev mode: would toggle %s", service)
-		return
+		return common.StatusUnknown
 	}
 
 	if serviceStatus(cfg, false) == common.StatusActive {
 		runSystemctl("stop", service)
 		logger.Printf("stopped %s", service)
-		return
+		return serviceStatus(cfg, false)
 	}
 
 	runSystemctl("start", service)
 	logger.Printf("started %s", service)
+	return serviceStatus(cfg, false)
 }
 
 func serviceStatus(cfg common.Config, dev bool) byte {

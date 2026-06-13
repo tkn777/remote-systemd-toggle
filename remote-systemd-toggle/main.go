@@ -93,11 +93,9 @@ func main() {
 	if err := common.WriteRequest(conn, cmd, pass); err != nil {
 		panic(err)
 	}
-	if cmd == common.CmdStatus {
-		status, err := common.ReadStatus(conn)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(common.StatusText(status))
+	status, err := common.ReadStatus(conn)
+	if err != nil {
+		panic(err)
 	}
+	fmt.Println(common.StatusText(status))
 }

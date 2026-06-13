@@ -47,6 +47,28 @@ func TestMTLSStatusDevMode(t *testing.T) {
 	<-done
 }
 
+func TestMTLSToggleDevMode(t *testing.T) {
+	cfg, configDir, serverTLS, clientTLS := testSetup(t, "secret")
+	ln := testListener(t, serverTLS)
+	done := serveOnce(t, ln, configDir, cfg, true)
+
+	conn := testDial(t, ln.Addr().String(), clientTLS)
+	defer conn.Close() //nolint:errcheck // Test cleanup.
+
+	if err := common.WriteRequest(conn, common.CmdToggle, []byte("secret")); err != nil {
+		t.Fatal(err)
+	}
+	status, err := common.ReadStatus(conn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status != common.StatusUnknown {
+		t.Fatalf("status = %d, want %d", status, common.StatusUnknown)
+	}
+
+	<-done
+}
+
 func TestMTLSRejectsMissingClientCertificate(t *testing.T) {
 	cfg, configDir, serverTLS, clientTLS := testSetup(t, "secret")
 	clientTLS.Certificates = nil
@@ -77,6 +99,13 @@ func TestWrongPasswordDevMode(t *testing.T) {
 
 	if err := common.WriteRequest(conn, common.CmdToggle, []byte("wrong")); err != nil {
 		t.Fatal(err)
+	}
+	status, err := common.ReadStatus(conn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if status != common.StatusUnauthorized {
+		t.Fatalf("status = %d, want %d", status, common.StatusUnauthorized)
 	}
 
 	<-done
@@ -130,14 +159,18 @@ func TestServiceStatusWithFakeSystemctl(t *testing.T) {
 
 func TestToggleServiceWithFakeSystemctl(t *testing.T) {
 	logPath := installFakeSystemctl(t, "active")
-	toggleService(testServiceConfig(), false)
-	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstop example.service\n" {
+	if status := toggleService(testServiceConfig(), false); status != common.StatusActive {
+		t.Fatalf("active toggle status = %d, want %d", status, common.StatusActive)
+	}
+	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstop example.service\nis-active example.service\n" {
 		t.Fatalf("active toggle log = %q", log)
 	}
 
 	logPath = installFakeSystemctl(t, "inactive")
-	toggleService(testServiceConfig(), false)
-	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstart example.service\n" {
+	if status := toggleService(testServiceConfig(), false); status != common.StatusInactive {
+		t.Fatalf("inactive toggle status = %d, want %d", status, common.StatusInactive)
+	}
+	if log := readSystemctlLog(t, logPath); log != "is-active example.service\nstart example.service\nis-active example.service\n" {
 		t.Fatalf("inactive toggle log = %q", log)
 	}
 }

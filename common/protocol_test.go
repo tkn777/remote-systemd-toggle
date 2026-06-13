@@ -61,11 +61,12 @@ func TestStatusRoundTrip(t *testing.T) {
 
 func TestStatusText(t *testing.T) {
 	tests := map[byte]string{
-		StatusInactive: "inactive",
-		StatusActive:   "active",
-		StatusFailed:   "failed",
-		StatusUnknown:  "unknown",
-		99:             "unknown",
+		StatusInactive:     "inactive",
+		StatusActive:       "active",
+		StatusFailed:       "failed",
+		StatusUnknown:      "unknown",
+		StatusUnauthorized: "unauthorized",
+		99:                 "unknown",
 	}
 
 	for status, want := range tests {

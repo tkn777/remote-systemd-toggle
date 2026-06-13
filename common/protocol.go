@@ -11,10 +11,11 @@ const (
 	CmdToggle byte = 1
 	CmdStatus byte = 2
 
-	StatusInactive byte = 0
-	StatusActive   byte = 1
-	StatusFailed   byte = 2
-	StatusUnknown  byte = 3
+	StatusInactive     byte = 0
+	StatusActive       byte = 1
+	StatusFailed       byte = 2
+	StatusUnknown      byte = 3
+	StatusUnauthorized byte = 4
 )
 
 func ReadRequest(r io.Reader) (byte, []byte, error) {
@@ -65,6 +66,8 @@ func StatusText(status byte) string {
 		return "active"
 	case StatusFailed:
 		return "failed"
+	case StatusUnauthorized:
+		return "unauthorized"
 	default:
 		return "unknown"
 	}

@@ -21,11 +21,22 @@ import (
 
 func TestClientToggle(t *testing.T) {
 	ln, home := testClientSetup(t)
-	done := testServeClientRequest(t, ln, common.CmdToggle, nil)
-
-	withClientEnv(t, home, []string{"remote-systemd-toggle", "--password", "secret"}, func() {
-		main()
+	done := testServeClientRequest(t, ln, common.CmdToggle, func(conn net.Conn) {
+		if err := common.WriteStatus(conn, common.StatusActive); err != nil {
+			t.Errorf("write status failed: %v", err)
+		}
 	})
+
+	var out bytes.Buffer
+	withClientStdout(t, &out, func() {
+		withClientEnv(t, home, []string{"remote-systemd-toggle", "--password", "secret"}, func() {
+			main()
+		})
+	})
+
+	if got := out.String(); got != "active\n" {
+		t.Fatalf("stdout = %q, want %q", got, "active\n")
+	}
 
 	<-done
 }
