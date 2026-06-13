@@ -6,7 +6,7 @@ OUT_DIR="${1:-client-certs}"
 CLIENT_NAME="${2:-remote-systemd-toggle-client}"
 CLIENT_CA_CN="${CLIENT_CA_CN:-remote-systemd-toggle client CA}"
 CLIENT_CN="${CLIENT_CN:-$CLIENT_NAME}"
-DAYS="${DAYS:-36500}"
+DAYS="${DAYS:-1826}"
 
 mkdir -p "$OUT_DIR"
 

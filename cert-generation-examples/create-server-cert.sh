@@ -6,7 +6,7 @@ OUT_DIR="${1:-server-certs}"
 SERVER_NAME="${2:-localhost}"
 SERVER_CA_CN="${SERVER_CA_CN:-remote-systemd-toggle server CA}"
 SERVER_CN="${SERVER_CN:-$SERVER_NAME}"
-DAYS="${DAYS:-36500}"
+DAYS="${DAYS:-1826}"
 
 mkdir -p "$OUT_DIR"
 
