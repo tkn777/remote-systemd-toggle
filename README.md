@@ -240,6 +240,13 @@ remote-systemd-toggled.service
 Install it according to your distribution's systemd conventions and adjust
 paths if needed.
 
+Then enable and start the service (after it is configured):
+
+```sh bash 
+systemctl enable remote-systemd-toggled.service
+systemctl start remote-systemd-toggled.service
+```
+
 ---
 
 ## 🧪 Development Mode
