@@ -90,7 +90,7 @@ func main() {
 	clientCAs := x509.NewCertPool()
 	clientCA, err := os.ReadFile(cfg.TLS.ClientCACert)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("failed to read TLS.client-ca-cert %q: %v", cfg.TLS.ClientCACert, err))
 	}
 	if !clientCAs.AppendCertsFromPEM(clientCA) {
 		panic("failed to load client-ca-cert")
