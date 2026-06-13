@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -56,7 +55,16 @@ func main() {
 
 	dev := common.HasArg(os.Args[1:], "--dev")
 	if !dev {
-		debug.SetTraceback("none")
+		defer func() {
+			if r := recover(); r != nil {
+				if logger != nil {
+					logger.Printf("panic: %v", r)
+				} else {
+					fmt.Fprintf(os.Stderr, "panic: %v\n", r)
+				}
+				os.Exit(2)
+			}
+		}()
 	}
 	passwd := common.HasArg(os.Args[1:], "--passwd")
 	setupLog(dev || passwd)
