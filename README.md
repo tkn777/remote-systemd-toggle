@@ -273,11 +273,19 @@ remote-systemd-toggled --version
 
 ## ⚖️ Tradeoffs
 
+### 💥 Fail Fast
+
 The tool intentionally fails fast on configuration errors or similar unexpected conditions.
 
 This is a deliberate design choice: a misconfigured remote service toggle should stop immediately and loudly instead of continuing in an undefined or potentially unsafe state.
 
 In other words: panic is not a bug here — it is part of the safety model. 😉
+
+### 🔐 Not SSH
+
+This tool is not a replacement for SSH.
+
+SSH is a powerful, feature-rich, and highly complex protocol for general remote access. `remote-systemd-toggle` deliberately goes in the opposite direction: one mTLS-protected TCP connection, one password-authenticated command, one response, and nothing else.
 
 ---
 
