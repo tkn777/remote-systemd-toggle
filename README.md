@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows-lightgrey)](#)
 [![Language](https://img.shields.io/badge/language-go-green)](#)
-[![GitHub release](https://img.shields.io/github/v/release/tkn777/remote-systemd-toggle?color=orange)](https://github.com/tkn777/remote-systemd-toggle/releases/latest)
+[![GitHub release](https://img.shields.io/github/v/release/tkn777/remote-systemd-toggle?color=ff8888)](https://github.com/tkn777/remote-systemd-toggle/releases/latest)
 
 <p align="left">
   <img src="resources/project-logo.png" alt="remote-systemd-toggle" height=200>
