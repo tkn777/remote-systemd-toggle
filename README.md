@@ -279,7 +279,7 @@ The tool intentionally fails fast on configuration errors or similar unexpected 
 
 This is a deliberate design choice: a misconfigured remote service toggle should stop immediately and loudly instead of continuing in an undefined or potentially unsafe state.
 
-In other words: panic is not a bug here — it is part of the safety model. 😉
+In other words: `panic` is not a bug here — it is part of the safety model. 😉
 
 ### 🔐 Not SSH
 
