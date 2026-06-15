@@ -1,4 +1,4 @@
-# 🔐 remote-systemd-toggle
+# remote-systemd-toggle
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Language](https://img.shields.io/badge/language-go-green)](#)
@@ -7,6 +7,8 @@
 <p align="left">
   <img src="resources/project-logo.png" alt="remote-systemd-toggle" height=200>
 </p>
+
+`remote-systemd-toggle` is intentionally not a remote shell. It exposes exactly one predefined systemd action over a tiny mTLS-protected request/response protocol.
 
 ---
 
