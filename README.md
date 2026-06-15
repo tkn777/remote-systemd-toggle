@@ -83,7 +83,7 @@ Detailed instructions for each step are provided in the sections below.
 1) `remote-systemd-toggle` connects to the configured server, toggles the configured service, and prints the new status.
 2) `remote-systemd-toggle --status` connects to the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
-   For scripts, the client also accepts `--password <password>` and skips the prompt.
+   For scripts, the client also accepts `--password <password>` and skips the prompt. This exposes the password to shell history and process listings; use it only in controlled environments.
 4) If authentication fails, the client prints `unauthorized`.
 5) The server accepts one connection at a time, reads one request, verifies the password, and then executes the requested command.\
    If the password is wrong, the server waits increasingly longer and eventually disables and stops itself.
