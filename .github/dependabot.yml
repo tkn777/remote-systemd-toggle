@@ -1,0 +1,45 @@
+# trigger dependabot - 2026-06-15
+version: 2
+
+updates:
+  # Go Dependencies
+  - package-ecosystem: gomod
+    directory: "/common"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    labels:
+      - dependencies
+      - go
+
+  - package-ecosystem: gomod
+    directory: "/remote-systemd-toggle"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    labels:
+      - dependencies
+      - go
+
+  - package-ecosystem: gomod
+    directory: "/remote-systemd-toggled"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    labels:
+      - dependencies
+      - go
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    rebase-strategy: auto
+    labels:
+      - dependencies
+      - github-actions
