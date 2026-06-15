@@ -1,0 +1,10 @@
+[remote-systemd-toggled]
+enabled = true
+filter = remote-systemd-toggled
+logpath = /var/log/syslog
+backend = auto
+port = 47112
+protocol = tcp
+maxretry = 3
+findtime = 10m
+bantime = 1h

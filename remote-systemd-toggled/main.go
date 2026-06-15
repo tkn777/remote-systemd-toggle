@@ -211,13 +211,14 @@ func newSecret(pass []byte, cfg common.Config) secretData {
 
 func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 	defer conn.Close() //nolint:errcheck // Connection is closed after one request; close errors are not actionable.
+	remote := remoteHost(conn)
 
 	if err := conn.SetDeadline(time.Now().Add(time.Duration(cfg.Server.Timeout) * time.Second)); err != nil {
-		logger.Printf("deadline failed: %v", err)
+		logger.Printf("deadline failed from %s: %v", remote, err)
 		return
 	}
 
-	if !checkClientCN(conn, cfg.TLS.ClientCN) {
+	if !checkClientCN(conn, cfg.TLS.ClientCN, remote) {
 		if err := common.WriteStatus(conn, common.StatusUnauthorized); err != nil {
 			logger.Printf("status write failed: %v", err)
 		}
@@ -226,7 +227,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 
 	cmd, pass, err := common.ReadRequest(conn)
 	if err != nil {
-		logger.Printf("read failed: %v", err)
+		logger.Printf("read failed from %s: %v", remote, err)
 		return
 	}
 	defer common.Wipe(pass)
@@ -236,7 +237,7 @@ func handleConn(conn net.Conn, configDir string, cfg common.Config, dev bool) {
 		if err := common.WriteStatus(conn, common.StatusUnauthorized); err != nil {
 			logger.Printf("status write failed: %v", err)
 		}
-		wrongPassword(cfg, dev)
+		wrongPassword(cfg, dev, remote)
 		return
 	}
 
@@ -268,13 +269,21 @@ func secretPath(configDir string, cfg common.Config) string {
 	return filepath.Join(configDir, cfg.Secrets.Path)
 }
 
-func checkClientCN(conn net.Conn, want string) bool {
+func remoteHost(conn net.Conn) string {
+	host, _, err := net.SplitHostPort(conn.RemoteAddr().String())
+	if err != nil {
+		return conn.RemoteAddr().String()
+	}
+	return host
+}
+
+func checkClientCN(conn net.Conn, want string, remote string) bool {
 	tlsConn, ok := conn.(*tls.Conn)
 	if !ok {
 		panic("expected tls connection")
 	}
 	if err := tlsConn.Handshake(); err != nil {
-		logger.Printf("tls handshake failed: %v", err)
+		logger.Printf("tls handshake failed from %s: %v", remote, err)
 		return false
 	}
 	if want == "" {
@@ -283,20 +292,20 @@ func checkClientCN(conn net.Conn, want string) bool {
 
 	certs := tlsConn.ConnectionState().PeerCertificates
 	if len(certs) == 0 {
-		logger.Print("client certificate missing")
+		logger.Printf("client certificate missing from %s", remote)
 		return false
 	}
 	if certs[0].Subject.CommonName != want {
-		logger.Printf("client certificate CN mismatch: expected %q, got %q", want, certs[0].Subject.CommonName)
+		logger.Printf("client certificate CN mismatch from %s: expected %q, got %q", remote, want, certs[0].Subject.CommonName)
 		return false
 	}
 	return true
 }
 
-func wrongPassword(cfg common.Config, dev bool) {
+func wrongPassword(cfg common.Config, dev bool, remote string) {
 	wrongPasses++
 
-	logger.Printf("wrong password attempt %d", wrongPasses)
+	logger.Printf("wrong password attempt %d from %s", wrongPasses, remote)
 	if wrongPasses >= cfg.Server.WrongPasswordLimit {
 		if dev {
 			logger.Printf("wrong password limit reached, would disable and stop %s", selfService)

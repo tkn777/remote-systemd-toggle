@@ -88,6 +88,17 @@ install_doc() {
 	cp -R "$ROOT_DIR/config-examples" "$doc_dir/"
 }
 
+install_fail2ban() {
+	package="$1"
+	pkg_dir="$2"
+	doc_dir="$pkg_dir/usr/share/doc/$package"
+
+	cp -R "$ROOT_DIR/fail2ban-examples" "$doc_dir/"
+	mkdir -p "$pkg_dir/etc/fail2ban/filter.d"
+	install -m 0644 "$ROOT_DIR/fail2ban-examples/remote-systemd-toggled.conf" \
+		"$pkg_dir/etc/fail2ban/filter.d/"
+}
+
 build_deb() {
 	package="$1"
 	binary="$2"
@@ -107,6 +118,7 @@ build_deb() {
 	if [ "$with_service" = "yes" ]; then
 		mkdir -p "$pkg_dir/usr/lib/systemd/system"
 		install -m 0644 "$UNIT_FILE" "$pkg_dir/usr/lib/systemd/system/"
+		install_fail2ban "$package" "$pkg_dir"
 	fi
 
 	dpkg-deb --root-owner-group --build "$pkg_dir" "$OUT_DIR/${package}_${PACKAGE_VERSION}_${arch}.deb"

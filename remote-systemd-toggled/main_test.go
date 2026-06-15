@@ -208,7 +208,7 @@ func TestWrongPasswordLimitRunsSystemctl(t *testing.T) {
 			WrongPasswordLimit:        2,
 			WrongPasswordDelayMinutes: 3,
 		},
-	}, false)
+	}, false, "127.0.0.1")
 
 	if log := readSystemctlLog(t, logPath); log != "disable remote-systemd-toggled.service\nstop remote-systemd-toggled.service\n" {
 		t.Fatalf("log = %q", log)

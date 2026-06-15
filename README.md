@@ -262,6 +262,53 @@ systemctl start remote-systemd-toggled.service
 
 ---
 
+## 🧱 fail2ban integration
+
+Example fail2ban configuration is provided in `fail2ban-examples/`:
+
+```text
+fail2ban-examples/remote-systemd-toggled.conf
+fail2ban-examples/remote-systemd-toggled.local
+```
+
+To enable fail2ban manually, install the filter and create or copy the jail:
+
+```text
+/etc/fail2ban/filter.d/remote-systemd-toggled.conf
+/etc/fail2ban/jail.d/remote-systemd-toggled.local
+```
+
+Example jail:
+
+```ini
+[remote-systemd-toggled]
+enabled = true
+filter = remote-systemd-toggled
+logpath = /var/log/syslog
+backend = auto
+port = 47112
+protocol = tcp
+maxretry = 3
+findtime = 10m
+bantime = 1h
+```
+
+Adjust `maxretry`, `findtime`, and `bantime` to your environment, then reload fail2ban.
+
+The generated server packages already installs the filter to:
+
+```text
+/etc/fail2ban/filter.d/remote-systemd-toggled.conf
+```
+
+It also includes the example files in:
+
+```text
+/usr/share/doc/remote-systemd-toggle-server/fail2ban-examples/
+```
+
+---
+
 ## 🏷️ Version
 
 Both binaries support `--version`:
