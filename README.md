@@ -66,7 +66,7 @@ On the tenth *(can be changed in config)* wrong password, the server disables an
 1) Get a binary from a release or from the Debian repository, or build one from source.
 2) Create certificates, optionally using `cert-generation-examples/` (for production, you only need to generate client certificates).
 3) Create the configuration file, optionally using `config-examples/` as a template.
-4) May be install fail2ban rules.
+4) May be install fail2ban rules (server only)
 
 Detailed instructions for each step are provided in the sections below.
 
