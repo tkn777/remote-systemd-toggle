@@ -25,6 +25,7 @@ profile.cov
 
 # Editor/IDE
 .vscode/
+*.swp
 
 # Local stuff
 local-docs
