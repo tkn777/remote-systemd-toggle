@@ -1,6 +1,6 @@
 module remote-systemd-toggle/remote-systemd-toggled
 
-go 1.26.4
+go 1.26.5
 
 require (
 	golang.org/x/crypto v0.53.0
