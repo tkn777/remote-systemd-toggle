@@ -158,6 +158,11 @@ For production servers, a public CA certificate such as a certbot certificate is
 usually preferable for the server certificate. The client certificate should
 still be issued by your private client CA.
 
+Keep CA private keys offline and do not deploy them to clients or servers. The
+server only needs its server certificate/key and the client CA certificate. The
+client only needs its client certificate/key and, if configured, the server CA
+certificate.
+
 ---
 
 ## ⚙️ Configuration
