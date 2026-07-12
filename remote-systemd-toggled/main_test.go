@@ -355,6 +355,35 @@ func TestSecurePathRejectsSymlink(t *testing.T) {
 	securePath(link, 0600)
 }
 
+func TestSecureDirFixesMode(t *testing.T) {
+	logger = log.New(io.Discard, "", 0)
+	dir := filepath.Join(t.TempDir(), "secrets")
+	if err := os.Mkdir(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	secureDir(dir)
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0700 {
+		t.Fatalf("mode = %04o, want 0700", info.Mode().Perm())
+	}
+}
+
+func TestCheckPasswordPanicsWhenSecretMissing(t *testing.T) {
+	logger = log.New(io.Discard, "", 0)
+	path := filepath.Join(t.TempDir(), "secrets.yml")
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected missing secret to panic")
+		}
+	}()
+	checkPassword(path, []byte("password"))
+}
+
 func runWrongPasswordLimitExitTest(t *testing.T) {
 	logger = log.New(io.Discard, "", 0)
 	wrongPasses = 0

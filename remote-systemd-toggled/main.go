@@ -149,14 +149,6 @@ func loadConfig() common.LoadedConfig {
 	return common.LoadConfigPath(configPath)
 }
 
-func secureFileIfExists(path string) {
-	if _, err := os.Lstat(path); err == nil {
-		secureFile(path)
-	} else if !os.IsNotExist(err) {
-		panic(fmt.Sprintf("failed to stat %s for permission fix: %v", path, err))
-	}
-}
-
 func secureFile(path string) {
 	securePath(path, secureFileMode)
 }
@@ -197,7 +189,12 @@ func securePath(path string, mode os.FileMode) {
 }
 
 func writeSecret(path string, cfg common.Config) {
-	secureFileIfExists(path)
+	secureDir(filepath.Dir(path))
+	if _, err := os.Lstat(path); err == nil {
+		secureFile(path)
+	} else if !os.IsNotExist(err) {
+		panic(fmt.Sprintf("failed to stat secrets file %s: %v", path, err))
+	}
 
 	fmt.Print("Password: ")
 	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
@@ -360,6 +357,7 @@ func wrongPassword(cfg common.Config, dev bool, remote string) {
 }
 
 func checkPassword(path string, pass []byte) bool {
+	secureDir(filepath.Dir(path))
 	secureFile(path)
 	data, err := os.ReadFile(path) // Read stored Argon2id parameters and hash.
 	if err != nil {
