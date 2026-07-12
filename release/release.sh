@@ -135,6 +135,7 @@ build_rpm_from_deb() {
 need go
 need dpkg-deb
 need alien
+need sha256sum
 
 copy_sources
 set_source_version "$VERSION"
@@ -157,6 +158,11 @@ for arch in amd64 arm64; do
 done
 
 build_go ./remote-systemd-toggle windows amd64 "$OUT_DIR/${CLIENT_NAME}.exe"
+
+(
+	cd "$OUT_DIR"
+	sha256sum * > SHA256SUMS
+)
 
 echo "release artifacts written to $OUT_DIR"
 
