@@ -366,6 +366,8 @@ Do not disable Microsoft Defender globally.
 Microsoft has been informed about this Defender false positive detection.\
 Case ID: 254eb93e-f17d-4c6a-8c4b-4b9699f0435b
 
+**In the meantime, Microsoft has classified the binary as harmless. With up-to-date Microsoft Defender security intelligence, it should now run without any issues.**
+
 ---
 
 ## 🧪 Development Mode
