@@ -99,6 +99,48 @@ install_fail2ban() {
 		"$pkg_dir/etc/fail2ban/filter.d/"
 }
 
+install_service_scripts() {
+	pkg_dir="$1"
+
+	cat > "$pkg_dir/DEBIAN/postinst" <<'POSTINST'
+#!/bin/sh
+set -e
+
+if command -v systemctl >/dev/null 2>&1; then
+	systemctl daemon-reload
+	if systemctl is-enabled remote-systemd-toggled.service >/dev/null 2>&1; then
+		systemctl restart remote-systemd-toggled.service
+	fi
+fi
+
+exit 0
+POSTINST
+
+	cat > "$pkg_dir/DEBIAN/postrm" <<'POSTRM'
+#!/bin/sh
+set -e
+
+if command -v systemctl >/dev/null 2>&1; then
+	systemctl daemon-reload
+fi
+
+exit 0
+POSTRM
+
+	cat > "$pkg_dir/DEBIAN/prerm" <<'PRERM'
+#!/bin/sh
+set -e
+
+if [ "$1" = "remove" ] && command -v systemctl >/dev/null 2>&1; then
+	systemctl stop remote-systemd-toggled.service || true
+fi
+
+exit 0
+PRERM
+
+	chmod 0755 "$pkg_dir/DEBIAN/postinst" "$pkg_dir/DEBIAN/postrm" "$pkg_dir/DEBIAN/prerm"
+}
+
 build_deb() {
 	package="$1"
 	binary="$2"
@@ -119,6 +161,7 @@ build_deb() {
 		mkdir -p "$pkg_dir/usr/lib/systemd/system"
 		install -m 0644 "$UNIT_FILE" "$pkg_dir/usr/lib/systemd/system/"
 		install_fail2ban "$package" "$pkg_dir"
+		install_service_scripts "$pkg_dir"
 	fi
 
 	dpkg-deb --root-owner-group --build "$pkg_dir" "$OUT_DIR/${package}_${PACKAGE_VERSION}_${arch}.deb"
