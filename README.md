@@ -39,7 +39,7 @@ strict authentication:
 - TLS 1.3 only
 - mutual TLS is required
 - the server verifies the client certificate against `TLS.client-ca-cert`
-- the server can additionally verify the client certificate CN with `TLS.client-cn`
+- the server can additionally verify the client certificate CN with `TLS.client-cn` (recommended for production)
 - the client verifies the server certificate using system CAs plus optional `TLS.server-ca-cert`
 - toggle and status requests both require mTLS and the password
 - every parsed request returns one status response after mTLS; wrong passwords return `unauthorized`
@@ -212,7 +212,7 @@ TLS:
   cert: /etc/letsencrypt/live/vpn.example.org/fullchain.pem
   key: /etc/letsencrypt/live/vpn.example.org/privkey.pem
   client-ca-cert: /etc/remote-systemd-toggle/client-ca.crt
-  client-cn: remote-systemd-toggle-client   # optional, verifies the client certificate CN when set
+  client-cn: remote-systemd-toggle-client   # optional, verifies the client certificate CN when set, recommended for production
 
 Service:
   name: example.service
