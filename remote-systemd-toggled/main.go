@@ -16,6 +16,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"golang.org/x/crypto/argon2"
@@ -26,8 +27,10 @@ import (
 )
 
 const (
-	defaultListen = "0.0.0.0"
-	selfService   = "remote-systemd-toggled.service"
+	defaultListen  = "0.0.0.0"
+	selfService    = "remote-systemd-toggled.service"
+	secureDirMode  = 0700
+	secureFileMode = 0600
 )
 
 type secretData struct {
@@ -69,9 +72,7 @@ func main() {
 	passwd := common.HasArg(os.Args[1:], "--passwd")
 	setupLog(dev || passwd)
 
-	configPath, configDir := common.FindConfig("config-server.yml")
-	loaded := common.LoadConfigPath(configPath)
-	fixServerPerms(configDir, configPath, loaded.Config)
+	loaded := loadConfig()
 
 	if passwd {
 		writeSecret(secretPath(loaded.Dir, loaded.Config), loaded.Config)
@@ -141,20 +142,50 @@ func warnf(format string, v ...any) {
 	logger.Print(msg)
 }
 
-func fixServerPerms(dir, configPath string, cfg common.Config) {
-	chmodIfNeeded(dir, 0700)
-	chmodIfNeeded(configPath, 0600)
+func loadConfig() common.LoadedConfig {
+	configPath, configDir := common.FindConfig("config-server.yml")
+	secureDir(configDir)
+	secureFile(configPath)
+	return common.LoadConfigPath(configPath)
+}
 
-	path := secretPath(dir, cfg)
-	if _, err := os.Stat(path); err == nil {
-		chmodIfNeeded(path, 0600)
+func secureFileIfExists(path string) {
+	if _, err := os.Lstat(path); err == nil {
+		secureFile(path)
+	} else if !os.IsNotExist(err) {
+		panic(fmt.Sprintf("failed to stat %s for permission fix: %v", path, err))
 	}
 }
 
-func chmodIfNeeded(path string, mode os.FileMode) {
-	info, err := os.Stat(path)
+func secureFile(path string) {
+	securePath(path, secureFileMode)
+}
+
+func secureDir(path string) {
+	securePath(path, secureDirMode)
+}
+
+func securePath(path string, mode os.FileMode) {
+	info, err := os.Lstat(path)
 	if err != nil {
 		panic(fmt.Sprintf("failed to stat %s for permission fix: %v", path, err))
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		panic(fmt.Sprintf("refusing symlink for protected path %s", path))
+	}
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		panic(fmt.Sprintf("failed to read owner of protected path %s", path))
+	}
+	uid, gid := os.Geteuid(), os.Getegid()
+	if uid == 0 {
+		gid = 0
+	}
+	if stat.Uid != uint32(uid) || stat.Gid != uint32(gid) {
+		if err := os.Chown(path, uid, gid); err != nil {
+			panic(fmt.Sprintf("failed to chown %s to %d:%d: %v", path, uid, gid, err))
+		}
+		warnf("fixed owner on %s to %d:%d", path, uid, gid)
 	}
 	if info.Mode().Perm() == mode {
 		return
@@ -166,6 +197,8 @@ func chmodIfNeeded(path string, mode os.FileMode) {
 }
 
 func writeSecret(path string, cfg common.Config) {
+	secureFileIfExists(path)
+
 	fmt.Print("Password: ")
 	pass, err := term.ReadPassword(int(os.Stdin.Fd()))
 	fmt.Println()
@@ -327,6 +360,7 @@ func wrongPassword(cfg common.Config, dev bool, remote string) {
 }
 
 func checkPassword(path string, pass []byte) bool {
+	secureFile(path)
 	data, err := os.ReadFile(path) // Read stored Argon2id parameters and hash.
 	if err != nil {
 		panic(fmt.Sprintf("failed to read secrets file %s: %v", path, err))

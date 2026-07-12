@@ -316,6 +316,45 @@ func TestSecretPath(t *testing.T) {
 	}
 }
 
+func TestSecurePathFixesMode(t *testing.T) {
+	logger = log.New(io.Discard, "", 0)
+	path := filepath.Join(t.TempDir(), "config-server.yml")
+	if err := os.WriteFile(path, []byte("Server:\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(path, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	securePath(path, 0600)
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0600 {
+		t.Fatalf("mode = %04o, want 0600", info.Mode().Perm())
+	}
+}
+
+func TestSecurePathRejectsSymlink(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "target")
+	link := filepath.Join(dir, "link")
+	if err := os.WriteFile(target, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(target, link); err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected securePath to reject symlink")
+		}
+	}()
+	securePath(link, 0600)
+}
+
 func runWrongPasswordLimitExitTest(t *testing.T) {
 	logger = log.New(io.Discard, "", 0)
 	wrongPasses = 0
