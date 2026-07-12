@@ -15,6 +15,7 @@ SERVER_CA_CERT="$OUT_DIR/server-ca.crt"
 SERVER_KEY="$OUT_DIR/server.key"
 SERVER_CSR="$OUT_DIR/server.csr"
 SERVER_CERT="$OUT_DIR/server.crt"
+SERVER_CA_CONF="$OUT_DIR/server-ca.cnf"
 SERVER_EXT="$OUT_DIR/server.ext"
 
 for file in "$SERVER_CA_KEY" "$SERVER_CA_CERT" "$SERVER_KEY" "$SERVER_CERT"; do
@@ -25,8 +26,23 @@ for file in "$SERVER_CA_KEY" "$SERVER_CA_CERT" "$SERVER_KEY" "$SERVER_CERT"; do
 done
 
 openssl genpkey -algorithm ED25519 -out "$SERVER_CA_KEY"
+cat > "$SERVER_CA_CONF" <<EOF
+[req]
+prompt=no
+distinguished_name=dn
+x509_extensions=v3_ca
+
+[dn]
+CN=$SERVER_CA_CN
+
+[v3_ca]
+basicConstraints=critical,CA:TRUE,pathlen:0
+keyUsage=critical,keyCertSign,cRLSign
+subjectKeyIdentifier=hash
+EOF
+
 openssl req -x509 -new -key "$SERVER_CA_KEY" -days "$DAYS" -out "$SERVER_CA_CERT" \
-	-subj "/CN=$SERVER_CA_CN"
+	-config "$SERVER_CA_CONF"
 
 openssl genpkey -algorithm ED25519 -out "$SERVER_KEY"
 openssl req -new -key "$SERVER_KEY" -out "$SERVER_CSR" \
@@ -42,16 +58,18 @@ case "$SERVER_NAME" in
 esac
 
 cat > "$SERVER_EXT" <<EOF
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature
 extendedKeyUsage=serverAuth
 subjectAltName=$SAN
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
 EOF
 
 openssl x509 -req -in "$SERVER_CSR" -CA "$SERVER_CA_CERT" -CAkey "$SERVER_CA_KEY" \
 	-CAcreateserial -days "$DAYS" -out "$SERVER_CERT" -extfile "$SERVER_EXT"
 
-rm -f "$SERVER_CSR" "$SERVER_EXT" "$OUT_DIR/server-ca.srl"
+rm -f "$SERVER_CSR" "$SERVER_CA_CONF" "$SERVER_EXT" "$OUT_DIR/server-ca.srl"
 chmod 0600 "$SERVER_CA_KEY" "$SERVER_KEY"
 chmod 0644 "$SERVER_CA_CERT" "$SERVER_CERT"
 

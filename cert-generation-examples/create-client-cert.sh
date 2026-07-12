@@ -15,6 +15,7 @@ CLIENT_CA_CERT="$OUT_DIR/client-ca.crt"
 CLIENT_KEY="$OUT_DIR/client.key"
 CLIENT_CSR="$OUT_DIR/client.csr"
 CLIENT_CERT="$OUT_DIR/client.crt"
+CLIENT_CA_CONF="$OUT_DIR/client-ca.cnf"
 CLIENT_EXT="$OUT_DIR/client.ext"
 
 for file in "$CLIENT_CA_KEY" "$CLIENT_CA_CERT" "$CLIENT_KEY" "$CLIENT_CERT"; do
@@ -25,24 +26,41 @@ for file in "$CLIENT_CA_KEY" "$CLIENT_CA_CERT" "$CLIENT_KEY" "$CLIENT_CERT"; do
 done
 
 openssl genpkey -algorithm ED25519 -out "$CLIENT_CA_KEY"
+cat > "$CLIENT_CA_CONF" <<EOF
+[req]
+prompt=no
+distinguished_name=dn
+x509_extensions=v3_ca
+
+[dn]
+CN=$CLIENT_CA_CN
+
+[v3_ca]
+basicConstraints=critical,CA:TRUE,pathlen:0
+keyUsage=critical,keyCertSign,cRLSign
+subjectKeyIdentifier=hash
+EOF
+
 openssl req -x509 -new -key "$CLIENT_CA_KEY" -days "$DAYS" -out "$CLIENT_CA_CERT" \
-	-subj "/CN=$CLIENT_CA_CN"
+	-config "$CLIENT_CA_CONF"
 
 openssl genpkey -algorithm ED25519 -out "$CLIENT_KEY"
 openssl req -new -key "$CLIENT_KEY" -out "$CLIENT_CSR" \
 	-subj "/CN=$CLIENT_CN"
 
 cat > "$CLIENT_EXT" <<EOF
-basicConstraints=CA:FALSE
-keyUsage=digitalSignature
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature
 extendedKeyUsage=clientAuth
 subjectAltName=DNS:$CLIENT_NAME
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
 EOF
 
 openssl x509 -req -in "$CLIENT_CSR" -CA "$CLIENT_CA_CERT" -CAkey "$CLIENT_CA_KEY" \
 	-CAcreateserial -days "$DAYS" -out "$CLIENT_CERT" -extfile "$CLIENT_EXT"
 
-rm -f "$CLIENT_CSR" "$CLIENT_EXT" "$OUT_DIR/client-ca.srl"
+rm -f "$CLIENT_CSR" "$CLIENT_CA_CONF" "$CLIENT_EXT" "$OUT_DIR/client-ca.srl"
 chmod 0600 "$CLIENT_CA_KEY" "$CLIENT_KEY"
 chmod 0644 "$CLIENT_CA_CERT" "$CLIENT_CERT"
 
