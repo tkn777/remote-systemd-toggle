@@ -81,8 +81,8 @@ Detailed instructions for each step are provided in the sections below.
 
 ### 💻 Client
 
-1) `remote-systemd-toggle` connects to the configured server, toggles the configured service, and prints the new status.
-2) `remote-systemd-toggle --status` connects to the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
+1) `remote-systemd-toggle toggle` connects to the configured server, toggles the configured service, and prints the new status. Without a command, `toggle` is used as the default.
+2) `remote-systemd-toggle status` connects to the configured server and prints the current status: `active`, `inactive`, `failed`, or `unknown`.
 3) The client prompts for a password and sends one authenticated request to the server.\
    For scripts, the client also accepts `--password <password>` and skips the prompt. This exposes the password to shell history and process listings; use it only in controlled environments.
 4) If authentication fails, the client prints `unauthorized`.
@@ -385,7 +385,7 @@ Development mode is completely non-destructive:
 - Toggle and status requests return `unknown`; the server only logs what it would do.
 - No delay is applied after a wrong password. The calculated delay is logged, but execution continues immediately.
 - No `systemctl` actions are executed after a last wrong password. The server only logs whether it would stop and exits.
-- `remote-systemd-toggle` and `remote-systemd-toggle --status` return `unknown` and do not check the service status.
+- `remote-systemd-toggle toggle` and `remote-systemd-toggle status` return `unknown` and do not check the service status.
 - Stacktraces are printed.
 
 The client has a `--dev` flag too, just to enable stacktraces.

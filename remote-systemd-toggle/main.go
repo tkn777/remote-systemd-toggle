@@ -35,6 +35,23 @@ func password() []byte {
 	return pass
 }
 
+func command() byte {
+	if common.HasArg(os.Args[1:], "--status") {
+		panic("--status is no longer supported, use: status")
+	}
+	if len(os.Args) < 2 {
+		return common.CmdToggle
+	}
+	switch os.Args[1] {
+	case "status":
+		return common.CmdStatus
+	case "toggle":
+		return common.CmdToggle
+	default:
+		return common.CmdToggle
+	}
+}
+
 func main() {
 	dev := common.HasArg(os.Args[1:], "--dev")
 	if !dev {
@@ -49,10 +66,7 @@ func main() {
 		fmt.Println(version)
 		return
 	}
-	cmd := common.CmdToggle
-	if common.HasArg(os.Args[1:], "--status") {
-		cmd = common.CmdStatus
-	}
+	cmd := command()
 
 	loaded := common.LoadConfig("config-client.yml")
 	cfg := loaded.Config

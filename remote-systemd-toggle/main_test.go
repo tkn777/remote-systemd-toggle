@@ -51,7 +51,7 @@ func TestClientStatus(t *testing.T) {
 
 	var out bytes.Buffer
 	withClientStdout(t, &out, func() {
-		withClientEnv(t, home, []string{"remote-systemd-toggle", "--status", "--password", "secret"}, func() {
+		withClientEnv(t, home, []string{"remote-systemd-toggle", "status", "--password", "secret"}, func() {
 			main()
 		})
 	})
@@ -61,6 +61,57 @@ func TestClientStatus(t *testing.T) {
 	}
 
 	<-done
+}
+
+func TestCommandDefaultsToToggleWithoutArgs(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle"}, func() {
+		if got := command(); got != common.CmdToggle {
+			t.Fatalf("command = %d, want toggle", got)
+		}
+	})
+}
+
+func TestCommandDefaultsToToggleWithFlagFirst(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle", "--dev"}, func() {
+		if got := command(); got != common.CmdToggle {
+			t.Fatalf("command = %d, want toggle", got)
+		}
+	})
+}
+
+func TestCommandDefaultsToToggleWhenStatusIsNotFirst(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle", "--password", "secret", "status"}, func() {
+		if got := command(); got != common.CmdToggle {
+			t.Fatalf("command = %d, want toggle", got)
+		}
+	})
+}
+
+func TestCommandExplicitToggle(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle", "toggle", "--password", "secret"}, func() {
+		if got := command(); got != common.CmdToggle {
+			t.Fatalf("command = %d, want toggle", got)
+		}
+	})
+}
+
+func TestCommandExplicitStatus(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle", "status", "--password", "secret"}, func() {
+		if got := command(); got != common.CmdStatus {
+			t.Fatalf("command = %d, want status", got)
+		}
+	})
+}
+
+func TestCommandRejectsOldStatusFlag(t *testing.T) {
+	withClientArgs(t, []string{"remote-systemd-toggle", "--status", "--password", "secret"}, func() {
+		defer func() {
+			if recover() == nil {
+				t.Fatal("expected --status to panic")
+			}
+		}()
+		command()
+	})
 }
 
 func testClientSetup(t *testing.T) (net.Listener, string) {
@@ -159,9 +210,17 @@ func testServeClientRequest(t *testing.T, ln net.Listener, wantCmd byte, reply f
 func withClientEnv(t *testing.T, home string, args []string, fn func()) {
 	t.Helper()
 
+	withClientArgs(t, args, func() {
+		t.Setenv("HOME", home)
+		fn()
+	})
+}
+
+func withClientArgs(t *testing.T, args []string, fn func()) {
+	t.Helper()
+
 	oldArgs := os.Args
 	os.Args = args
-	t.Setenv("HOME", home)
 	defer func() {
 		os.Args = oldArgs
 	}()
