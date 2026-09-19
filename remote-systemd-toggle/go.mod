@@ -1,6 +1,6 @@
 module remote-systemd-toggle/remote-systemd-toggle
 
-go 1.27.0
+go 1.27.1
 
 require (
 	golang.org/x/term v0.46.0
