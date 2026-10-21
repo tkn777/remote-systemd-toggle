@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Only the current `main` branch is supported.
+Only the current `master` branch is supported.
 
 This project is small and does not maintain multiple release branches at this
 time.
